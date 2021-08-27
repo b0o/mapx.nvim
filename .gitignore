@@ -1,3 +1,4 @@
+doc/tags
 
 # Created by https://www.toptal.com/developers/gitignore/api/linux,macos,windows,vim,git
 # Edit at https://www.toptal.com/developers/gitignore?templates=linux,macos,windows,vim,git
@@ -107,3 +108,4 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/linux,macos,windows,vim,git
+
