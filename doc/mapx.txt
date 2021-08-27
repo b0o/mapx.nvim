@@ -1,0 +1,158 @@
+*mapx.txt*  Make mapping more marvelous.                     *mapx* *mapx.lua*
+
+Author:         Maddison Hellstrom <https://github.com/b0o/>
+Licence:        MIT
+Homepage:       https://github.com/b0o/mapx.lua
+Version:        0.0.1
+
+==============================================================================
+CONTENTS                                                     *mapx-contents*
+
+    1. Intro ................................ |mapx-intro|
+    2. API .................................. |mapx-api|
+    3. Map Options .......................... |mapx-options|
+    4. Buffer-local Maps .................... |mapx-buffer-maps|
+    5. Example Usage ........................ |mapx-example|
+    6. Changelog ............................ |mapx-changelog|
+    7. License .............................. |mapx-license|
+
+==============================================================================
+1. Intro                                                     *mapx-intro*
+
+mapx.lua provides lua helper functions that mimic vim's |:map| family of
+commands. Its aim is to make configuring key maps from within lua more ergonomic.
+
+All mapx functions have the signature:
+>
+    map({lhs}, {rhs}, ...{opts})
+<
+The `...{opts}` denotes variadic arguments. Each `{opts}` argument should be
+an `{opts}` table containing options for the map (see |nvim_set_keymap()|).
+All of these variadic table arguments will be merged into a single table
+before calling |nvim_set_keymap()|.
+
+==============================================================================
+2. API                                                       *mapx-api*
+
+  map ({lhs}, {rhs}, ...{opts})                              *mapx.map()*
+  nmap({lhs}, {rhs}, ...{opts})                              *mapx.nmap()*
+  vmap({lhs}, {rhs}, ...{opts})                              *mapx.vmap()*
+  xmap({lhs}, {rhs}, ...{opts})                              *mapx.xmap()*
+  smap({lhs}, {rhs}, ...{opts})                              *mapx.smap()*
+  omap({lhs}, {rhs}, ...{opts})                              *mapx.omap()*
+  imap({lhs}, {rhs}, ...{opts})                              *mapx.imap()*
+  lmap({lhs}, {rhs}, ...{opts})                              *mapx.lmap()*
+  cmap({lhs}, {rhs}, ...{opts})                              *mapx.cmap()*
+  tmap({lhs}, {rhs}, ...{opts})                              *mapx.tmap()*
+
+`noremap` variants are also available. These functions are the same as their
+normal counterpart above but they merge `{opts}` with `{ noremap = true }`:
+
+  noremap ({lhs}, {rhs}, ...{opts})                          *mapx.noremap()*
+  nnoremap({lhs}, {rhs}, ...{opts})                          *mapx.nnoremap()*
+  vnoremap({lhs}, {rhs}, ...{opts})                          *mapx.vnoremap()*
+  xnoremap({lhs}, {rhs}, ...{opts})                          *mapx.xnoremap()*
+  snoremap({lhs}, {rhs}, ...{opts})                          *mapx.snoremap()*
+  onoremap({lhs}, {rhs}, ...{opts})                          *mapx.onoremap()*
+  inoremap({lhs}, {rhs}, ...{opts})                          *mapx.inoremap()*
+  lnoremap({lhs}, {rhs}, ...{opts})                          *mapx.lnoremap()*
+  cnoremap({lhs}, {rhs}, ...{opts})                          *mapx.cnoremap()*
+  tnoremap({lhs}, {rhs}, ...{opts})                          *mapx.tnoremap()*
+
+mapx also offers "bang" (|map!| and |noremap!|) variants:
+
+  mapbang({lhs}, {rhs}, ...{opts})                           *mapx.mapbang()*
+  noremapbang({lhs}, {rhs}, ...{opts})                       *mapx.noremapbang()*
+
+==============================================================================
+3. Map Options                                               *mapx-options*
+
+For your convenience, this module exports the following variables:
+
+  Variable      Lua value
+  buffer        `{ buffer = true }`                             *mapx.buffer*
+  nowait        `{ nowait = true }`                             *mapx.nowait*
+  silent        `{ silent = true }`                             *mapx.silent*
+  script        `{ script = true }`                             *mapx.script*
+  expr          `{ expr   = true }`                             *mapx.expr*
+  unique        `{ unique = true }`                             *mapx.unique*
+
+These variables are intended to be passed as individual `{opts}` arguments to
+reduce boilerplate in your config. For example:
+>
+  mapx.inoremap([[<m.expr>]], [[<Tab> pumvisible() ? "\<C-n>" : "\<Tab>"]], mapx.silent, mapx.expr)
+<
+Note that you don't need to use these variables, you are free to pass your own
+`{opts}` table(s):
+>
+  mapx.inoremap([[<m.expr>]], [[<Tab> pumvisible() ? "\<C-n>" : "\<Tab>"]], { silent = true, expr = true })
+<
+Alternatively, you can simply pass strings as options:
+>
+  mapx.inoremap([[<m.expr>]], [[<Tab> pumvisible() ? "\<C-n>" : "\<Tab>"]], "silent", "expr")
+<
+See |:map-arguments| for more information on vim's map options.
+
+==============================================================================
+4. Buffer-local Maps                                            *mapx-buffer-maps*
+
+Unlike the builtin |nvim_set_keymap()| API, you are able to create
+buffer-local maps by passing `{ buffer = true }` as an option to the mapx
+functions.
+
+If the `buffer` option is `true`, mapx will use the |nvim_buf_set_keymap()|
+function, with a value of `0` (current buffer) for `{buffer}`.
+
+To create the map on a specific buffer, set `buffer` to the buffer's |bufnr|:
+>
+ nnoremap("J", "5j", { buffer = 2 })
+<
+
+==============================================================================
+5. Example Usage                                                *mapx-example*
+>
+  local m = require'mapx'
+
+  m.map([[<C-z>]], [[<Nop>]])
+  m.mapbang([[<C-z>]], [[<Nop>]])
+
+  m.nnoremap([[j]], [[v:count ? 'j' : 'gj']], "expr")
+  m.nnoremap([[k]], [[v:count ? 'k' : 'gk']], "expr")
+
+  m.nmap([[J]], [[5j]])
+  m.nmap([[K]], [[5k]])
+
+  m.inoremap([[<Tab>]], [[pumvisible() ? "\<C-n>" : "\<Tab>"]], m.silent, m.expr)
+  m.inoremap([[<S-Tab>]], [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], m.silent, m.expr)
+<
+==============================================================================
+6. Changelog                                                    *mapx-changelog*
+
+27 Aug 2021: Initial Release                                            v0.0.1
+
+==============================================================================
+6. License                                                      *mapx-license*
+>
+  MIT License
+
+  Copyright © 2021 Maddison Hellstrom <github.com/b0o>
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the “Software”), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+<
+ vim:tw=78:ts=8:ft=help:norl:
