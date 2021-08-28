@@ -25,19 +25,19 @@ vim.api.nvim_set_keymap("i", [[<S-Tab>]], [[pumvisible() ? "\<C-p>" : "\<S-Tab>"
 With mapx:
 
 ```lua
-local m = require'mapx'
+require'mapx'.globalize()
 
-m.map([[<C-z>]], [[<Nop>]])
-m.mapbang([[<C-z>]], [[<Nop>]])
+map([[<C-z>]], [[<Nop>]])
+mapbang([[<C-z>]], [[<Nop>]])
 
-m.nnoremap([[j]], [[v:count ? 'j' : 'gj']], "expr")
-m.nnoremap([[k]], [[v:count ? 'k' : 'gk']], "expr")
+nnoremap([[j]], [[v:count ? 'j' : 'gj']], "expr")
+nnoremap([[k]], [[v:count ? 'k' : 'gk']], "expr")
 
-m.nmap([[J]], [[5j]])
-m.nmap([[K]], [[5k]])
+nmap([[J]], [[5j]])
+nmap([[K]], [[5k]])
 
-m.inoremap([[<Tab>]], [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "silent", "expr")
-m.inoremap([[<S-Tab>]], [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "silent", "expr")
+inoremap([[<Tab>]], [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "silent", "expr")
+inoremap([[<S-Tab>]], [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "silent", "expr")
 ```
 
 See the [full documentation](https://github.com/b0o/mapx.lua/blob/main/doc/mapx.txt) for more information.

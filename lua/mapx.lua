@@ -1,4 +1,3 @@
--- Helper function to create nvim_set_keymap helper functions bound to a mode
 local function _map(mode, _opts)
   return function(lhs, rhs, ...)
     local merge = { _opts }
@@ -30,21 +29,54 @@ local function _map(mode, _opts)
 end
 
 local mapx = {
+  globalized = false,
+
   buffer = { buffer = true },
   nowait = { nowait = true },
   silent = { silent = true },
   script = { script = true },
   expr   = { expr   = true },
   unique = { unique = true },
-
-  mapbang     = _map('!'),
-  noremapbang = _map('!', { noremap = true }),
 }
 
--- Create helper functions like `map`, `nnoremap`, `vmap`, etc.
-for _, m in ipairs {'', 'n', 'v', 'x', 's', 'o', 'i', 'l', 'c', 't'} do
-  mapx[m .. 'map'] = _map(m)
-  mapx[m .. 'noremap'] = _map(m, { noremap = true })
+local fns = {}
+
+local function bind(source, target, force)
+  local force = force or false
+  for k, v in pairs(source) do
+    if target[k] ~= nil then
+      local msg = "mapx.bind: overwriting key " .. k .. " on " .. string.format('%s', target)
+      if force then
+        print("warning: " .. msg .. " {force = true}")
+      else
+        error(msg)
+      end
+    end
+    target[k] = v
+  end
+  return target
 end
 
-return mapx
+local function init()
+  local force = force or false
+  for _, mode in ipairs {'', 'n', 'v', 'x', 's', 'o', 'i', 'l', 'c', 't'} do
+    local m = mode .. 'map'
+    local n = mode .. 'noremap'
+    fns[m] = _map(mode)
+    fns[n] = _map(mode, { noremap = true })
+  end
+  fns.mapbang     = _map('!')
+  fns.noremapbang = _map('!', { noremap = true })
+  bind(fns, mapx)
+  return mapx
+end
+
+function mapx.globalize(force)
+  if not mapx.globalized then
+    bind(fns, _G, force)
+    mapx.globalized = true
+  end
+  return mapx
+end
+
+return init()
