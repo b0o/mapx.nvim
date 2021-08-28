@@ -1,6 +1,6 @@
 # mapx.lua [![version](https://img.shields.io/github/v/tag/b0o/mapx.lua?style=flat&color=yellow&label=version&sort=semver)](https://github.com/b0o/mapx.lua/releases) [![license: MIT](https://img.shields.io/github/license/b0o/mapx.lua?style=flat&color=green)](https://mit-license.org)
 
-Make mapping more marvelous.
+A Neovim lua plugin to make mapping more manageable.
 
 mapx.lua provides lua helper functions that mimic vim's `:map` family of
 commands. Its aim is to make configuring key maps from within lua more
