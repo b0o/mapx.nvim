@@ -3,7 +3,7 @@
 Author:         Maddison Hellstrom <https://github.com/b0o/>
 Licence:        MIT
 Homepage:       https://github.com/b0o/mapx.lua
-Version:        0.0.1
+Version:        0.0.2
 
 ==============================================================================
 CONTENTS                                                         *mapx-contents*
@@ -161,6 +161,7 @@ To create the map on a specific buffer, set `buffer` to the buffer's |bufnr|:
 ==============================================================================
 6. Changelog                                                    *mapx-changelog*
 
+28 Aug 2021: Added |mapx.globalize()|                                     v0.0.2
 27 Aug 2021: Initial Release                                            v0.0.1
 
 ==============================================================================
