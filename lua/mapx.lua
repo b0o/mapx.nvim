@@ -27,15 +27,21 @@ local function _map(mode, _opts)
         end
       end
     end
-    if opts.buffer ~= nil then
-      local b = 0
-      if type(opts.buffer) ~= 'boolean' then
-        b = opts.buffer
+    local lhss = lhs
+    if type(lhs) ~= "table" then
+      lhss = {lhs}
+    end
+    for _, l in ipairs(lhss) do
+      if opts.buffer ~= nil then
+        local b = 0
+        if type(opts.buffer) ~= 'boolean' then
+          b = opts.buffer
+        end
+        opts.buffer = nil
+        vim.api.nvim_buf_set_keymap(b, mode, l, rhs, opts)
+      else
+        vim.api.nvim_set_keymap(mode, l, rhs, opts)
       end
-      opts.buffer = nil
-      vim.api.nvim_buf_set_keymap(b, mode, lhs, rhs, opts)
-    else
-      vim.api.nvim_set_keymap(mode, lhs, rhs, opts)
     end
   end
 end

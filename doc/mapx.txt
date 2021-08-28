@@ -20,19 +20,23 @@ CONTENTS                                                         *mapx-contents*
 1. Intro                                                            *mapx-intro*
 
 mapx.lua provides lua helper functions that mimic vim's |:map| family of
-commands. Its aim is to make configuring key maps from within lua more ergonomic.
+commands. It aims to make configuring key bindings from within lua more
+ergonomic.
+
+==============================================================================
+2. API                                                                *mapx-api*
 
 All mapx functions have the signature:
 >
     map({lhs}, {rhs}, ...{opts})
 <
+The `{lhs}` argument can be an array-like table containing multiple `{lhs}`
+strings, allowing you to map multiple key combinations to the same action.
+
 The `...{opts}` denotes variadic arguments. Each `{opts}` argument should be
 an `{opts}` table containing options for the map (see |nvim_set_keymap()|).
 All of these variadic table arguments will be merged into a single table
 before calling |nvim_set_keymap()|.
-
-==============================================================================
-2. API                                                                *mapx-api*
 
   mapx.map ({lhs}, {rhs}, ...{opts})                                *mapx.map()*
   mapx.nmap({lhs}, {rhs}, ...{opts})                               *mapx.nmap()*
@@ -157,6 +161,8 @@ To create the map on a specific buffer, set `buffer` to the buffer's |bufnr|:
 
   m.inoremap([[<Tab>]], [[pumvisible() ? "\<C-n>" : "\<Tab>"]], m.silent, m.expr)
   m.inoremap([[<S-Tab>]], [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], m.silent, m.expr)
+
+  m.nnoremap({[[<C-f>f]], [[<C-f><C-f>]]}, [[:lua require('telescope.builtin').find_files({previewer = false})<Cr>]], m.silent)
 <
 ==============================================================================
 6. Changelog                                                    *mapx-changelog*

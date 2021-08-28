@@ -9,17 +9,17 @@ ergonomic.
 Before mapx:
 
 ```lua
-vim.api.nvim_set_keymap("", [[<C-z>]], [[<Nop>]])
-vim.api.nvim_set_keymap("!", [[<C-z>]], [[<Nop>]])
+vim.api.nvim_set_keymap("", "<C-z>", "<Nop>")
+vim.api.nvim_set_keymap("!", "<C-z>", "<Nop>")
 
-vim.api.nvim_set_keymap("n", [[j]], [[v:count ? 'j' : 'gj']], { noremap = true, expr = true })
-vim.api.nvim_set_keymap("n", [[k]], [[v:count ? 'k' : 'gk']], { noremap = true, expr = true })
+vim.api.nvim_set_keymap("n", "j", "v:count ? 'j' : 'gj'", { noremap = true, expr = true })
+vim.api.nvim_set_keymap("n", "k", "v:count ? 'k' : 'gk'", { noremap = true, expr = true })
 
-vim.api.nvim_set_keymap("n", [[J]], [[5j]])
-vim.api.nvim_set_keymap("n", [[K]], [[5k]])
+vim.api.nvim_set_keymap("n", "J", "5j")
+vim.api.nvim_set_keymap("n", "K", "5k")
 
-vim.api.nvim_set_keymap("i", [[<Tab>]], [[pumvisible() ? "\<C-n>" : "\<Tab>"]], { noremap = true, silent = true, expr = true })
-vim.api.nvim_set_keymap("i", [[<S-Tab>]], [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], { noremap = true, silent = true, expr = true })
+vim.api.nvim_set_keymap("i", "<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], { noremap = true, silent = true, expr = true })
+vim.api.nvim_set_keymap("i", "<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], { noremap = true, silent = true, expr = true })
 ```
 
 With mapx:
@@ -27,17 +27,20 @@ With mapx:
 ```lua
 require'mapx'.globalize()
 
-map([[<C-z>]], [[<Nop>]])
-mapbang([[<C-z>]], [[<Nop>]])
+map("<C-z>", "<Nop>")
+mapbang("<C-z>", "<Nop>")
 
-nnoremap([[j]], [[v:count ? 'j' : 'gj']], "expr")
-nnoremap([[k]], [[v:count ? 'k' : 'gk']], "expr")
+nnoremap("j", "v:count ? 'j' : 'gj'", "expr")
+nnoremap("k", "v:count ? 'k' : 'gk'", "expr")
 
-nmap([[J]], [[5j]])
-nmap([[K]], [[5k]])
+nmap("J", "5j")
+nmap("K", "5k")
 
-inoremap([[<Tab>]], [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "silent", "expr")
-inoremap([[<S-Tab>]], [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "silent", "expr")
+inoremap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "silent", "expr")
+inoremap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "silent", "expr")
+
+-- Map multiple key combinations to the same action
+nnoremap({"<C-f><C-f>", "<C-f>f"}, ":lua require('telescope.builtin').find_files()<Cr>", "silent")
 ```
 
 See [`:h mapx`](https://github.com/b0o/mapx.lua/blob/main/doc/mapx.txt) for the full documentation.
