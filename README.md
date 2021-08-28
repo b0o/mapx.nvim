@@ -40,7 +40,7 @@ inoremap([[<Tab>]], [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "silent", "expr")
 inoremap([[<S-Tab>]], [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "silent", "expr")
 ```
 
-See the [full documentation](https://github.com/b0o/mapx.lua/blob/main/doc/mapx.txt) for more information.
+See [`:h mapx`](https://github.com/b0o/mapx.lua/blob/main/doc/mapx.txt) for the full documentation.
 
 ## Install
 
