@@ -1,3 +1,15 @@
+local mapx = {
+  globalized = false,
+  buffer = { buffer = true },
+  nowait = { nowait = true },
+  silent = { silent = true },
+  script = { script = true },
+  expr   = { expr   = true },
+  unique = { unique = true },
+}
+
+local fns = {}
+
 local function _map(mode, _opts)
   return function(lhs, rhs, ...)
     local merge = { _opts }
@@ -27,19 +39,6 @@ local function _map(mode, _opts)
     end
   end
 end
-
-local mapx = {
-  globalized = false,
-
-  buffer = { buffer = true },
-  nowait = { nowait = true },
-  silent = { silent = true },
-  script = { script = true },
-  expr   = { expr   = true },
-  unique = { unique = true },
-}
-
-local fns = {}
 
 local function bind(source, target, force)
   local force = force or false
