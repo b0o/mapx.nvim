@@ -9,129 +9,173 @@ Version:        0.0.2
 CONTENTS                                                         *mapx-contents*
 
     1. Intro ................................ |mapx-intro|
-    2. API .................................. |mapx-api|
-    3. Map Options .......................... |mapx-options|
-    4. Buffer-local Maps .................... |mapx-buffer-maps|
-    5. Example Usage ........................ |mapx-example|
-    6. Changelog ............................ |mapx-changelog|
-    7. License .............................. |mapx-license|
+    2. Setup ................................ |mapx-setup|
+      2.1. Configuration .................... |mapx-config|
+      2.2. Which-Key Support ................ |mapx-whichkey-support|
+    3. API .................................. |mapx-api|
+      3.1. Map Functions .................... |mapx-map-functions|
+      3.2. Map Options ...................... |mapx-map-options|
+      3.3. Buffer-local Maps ................ |mapx-buffer-maps|
+    4. Examples ............................. |mapx-examples|
+    5. Changelog ............................ |mapx-changelog|
+    6. License .............................. |mapx-license|
 
 ==============================================================================
 1. Intro                                                            *mapx-intro*
 
-mapx.lua provides lua helper functions that mimic vim's |:map| family of
+Mapx.lua provides lua helper functions that mimic vim's |:map| family of
 commands. It aims to make configuring key bindings from within lua more
 ergonomic.
 
 ==============================================================================
-2. API                                                                *mapx-api*
+2. Setup                                                            *mapx-setup*
 
-All mapx functions have the signature:
+The `setup()` function can be used to configure mapx:
+
+  mapx.setup({config})                                            *mapx.setup()*
+    `setup()` takes a `config` argument (see |mapx-config|) and returns the
+    mapx module. Subsequent calls to `setup()` have no effect but still return
+    the mapx module.
+
+------------------------------------------------------------------------------
+2.1 Configuration                                                  *mapx-config*
+
+Mapx can be configured to behave in various ways. The default configuration
+is:
 >
-    map({lhs}, {rhs}, ...{opts})
+  {
+    global = false,
+    whichkey = false,
+  }
+<
+  Key              Type          Default
+  config.global    bool|string   false                      *mapx-config-global*
+    If truthy, the mapx map functions will be attached to the global scope so
+    that they can be called directly. If there is a global name collision,
+    `setup()` will error out unless the is `"force"`.
+
+    Note that `global = true` does not bind the |mapx-map-options| variables
+    to the global scope, so you will still need to access them via the mapx
+    module or use |mapx-option-strings|.
+
+  config.whichkey  bool          false                    *mapx-config-whichkey*
+    If `true`, support for labeling keybinding with `which-key.nvim` is enabled.
+    See |mapx-whichkey-support|.
+
+
+------------------------------------------------------------------------------
+2.2 Which-Key Support                                    *mapx-whichkey-support*
+
+Mapx optionally supports integration with the which-key.nvim plugin, which can
+be found at https://github.com/folke/which-key.nvim.
+
+To enable this integration, ensure that `which-key` is installed and set
+|mapx-config-whichkey| to `true`.
+
+Once enabled, any |mapx-map-functions| can receive a final string argument to
+add a label the the mapping which will be shown by `which-key.nvim` (see
+|mapx-signature|).
+
+==============================================================================
+3. API                                                                *mapx-api*
+
+All |mapx-map-functions| have the signature:                      *mapx-signature*
+>
+    f({lhs}, {rhs}[, ...{opts}[, {whichkey-label}]])
 <
 The `{lhs}` argument can be an array-like table containing multiple `{lhs}`
 strings, allowing you to map multiple key combinations to the same action.
 
-The `...{opts}` denotes variadic arguments. Each `{opts}` argument should be
-an `{opts}` table containing options for the map (see |nvim_set_keymap()|).
-All of these variadic table arguments will be merged into a single table
-before calling |nvim_set_keymap()|.
+`...{opts}` denotes variadic arguments of 0 or more `{opts}` arguments. Each
+`{opts}` argument should be an `{opts}` table containing options for the map
+(see |nvim_set_keymap()|).  All of these variadic table arguments will be
+merged into a single table. See |map-options| for more information.
 
-  mapx.map ({lhs}, {rhs}, ...{opts})                                *mapx.map()*
-  mapx.nmap({lhs}, {rhs}, ...{opts})                               *mapx.nmap()*
-  mapx.vmap({lhs}, {rhs}, ...{opts})                               *mapx.vmap()*
-  mapx.xmap({lhs}, {rhs}, ...{opts})                               *mapx.xmap()*
-  mapx.smap({lhs}, {rhs}, ...{opts})                               *mapx.smap()*
-  mapx.omap({lhs}, {rhs}, ...{opts})                               *mapx.omap()*
-  mapx.imap({lhs}, {rhs}, ...{opts})                               *mapx.imap()*
-  mapx.lmap({lhs}, {rhs}, ...{opts})                               *mapx.lmap()*
-  mapx.cmap({lhs}, {rhs}, ...{opts})                               *mapx.cmap()*
-  mapx.tmap({lhs}, {rhs}, ...{opts})                               *mapx.tmap()*
+If |mapx-whichkey-support| is enabled, the final argument can be a string that
+labels the keybinding with which-key.nvim. The label can't be a string that
+conflicts with |mapx-option-strings|.
+
+------------------------------------------------------------------------------
+3.1 Map Functions                                          *mapx-map-functions*
+
+Mapx provides a function corresponding to each of vim's |:map| functions. All
+map functions have the same signature: |mapx-signature|.
+
+  mapx.map(...)                                                     *mapx.map()*
+  mapx.nmap(...)                                                   *mapx.nmap()*
+  mapx.vmap(...)                                                   *mapx.vmap()*
+  mapx.xmap(...)                                                   *mapx.xmap()*
+  mapx.smap(...)                                                   *mapx.smap()*
+  mapx.omap(...)                                                   *mapx.omap()*
+  mapx.imap(...)                                                   *mapx.imap()*
+  mapx.lmap(...)                                                   *mapx.lmap()*
+  mapx.cmap(...)                                                   *mapx.cmap()*
+  mapx.tmap(...)                                                   *mapx.tmap()*
 
 `noremap` variants are also available. These functions are the same as their
 normal counterpart above but they merge `{opts}` with `{ noremap = true }`:
 
-  mapx.noremap ({lhs}, {rhs}, ...{opts})                        *mapx.noremap()*
-  mapx.nnoremap({lhs}, {rhs}, ...{opts})                       *mapx.nnoremap()*
-  mapx.vnoremap({lhs}, {rhs}, ...{opts})                       *mapx.vnoremap()*
-  mapx.xnoremap({lhs}, {rhs}, ...{opts})                       *mapx.xnoremap()*
-  mapx.snoremap({lhs}, {rhs}, ...{opts})                       *mapx.snoremap()*
-  mapx.onoremap({lhs}, {rhs}, ...{opts})                       *mapx.onoremap()*
-  mapx.inoremap({lhs}, {rhs}, ...{opts})                       *mapx.inoremap()*
-  mapx.lnoremap({lhs}, {rhs}, ...{opts})                       *mapx.lnoremap()*
-  mapx.cnoremap({lhs}, {rhs}, ...{opts})                       *mapx.cnoremap()*
-  mapx.tnoremap({lhs}, {rhs}, ...{opts})                       *mapx.tnoremap()*
+  mapx.noremap(...)                                             *mapx.noremap()*
+  mapx.nnoremap(...)                                           *mapx.nnoremap()*
+  mapx.vnoremap(...)                                           *mapx.vnoremap()*
+  mapx.xnoremap(...)                                           *mapx.xnoremap()*
+  mapx.snoremap(...)                                           *mapx.snoremap()*
+  mapx.onoremap(...)                                           *mapx.onoremap()*
+  mapx.inoremap(...)                                           *mapx.inoremap()*
+  mapx.lnoremap(...)                                           *mapx.lnoremap()*
+  mapx.cnoremap(...)                                           *mapx.cnoremap()*
+  mapx.tnoremap(...)                                           *mapx.tnoremap()*
 
-mapx also offers "bang" (|map!| and |noremap!|) variants                 *mapx-bang*
+Mapx also offers "bang" (|:map!| and |:noremap!|) variants:              *mapx-bang*
 
-  mapx.mapbang    ({lhs}, {rhs}, ...{opts})                     *mapx.mapbang()*
-  mapx.noremapbang({lhs}, {rhs}, ...{opts})                 *mapx.noremapbang()*
+  mapx.mapbang(...)                                             *mapx.mapbang()*
+  mapx.noremapbang(...)                                     *mapx.noremapbang()*
 
-It is possible to bind the mapx functions directly to lua's global scope so
-that you call the map functions without indexing the mapx table:
-
-  mapx.globalize({force})                                    *mapx.globalize()*
-
-After calling globalize, you can access the mapx map functions directly from
-the global scope:
->
-  local m = require'mapx'.globalize()
-
-  map([[<C-z>]], [[<Nop>]])
-  mapbang([[<C-z>]], [[<Nop>]])
-
-  nnoremap([[j]], [[v:count ? 'j' : 'gj']], m.expr)
-  nnoremap([[k]], [[v:count ? 'k' : 'gk']], "expr")
-
-  nmap([[J]], [[5j]])
-  nmap([[K]], [[5k]])
-<
-The `globalize()` function returns the mapx module so that you can require,
-globalize, and assign mapx to a variable in a single line.
-
-If there is a global name collision, `globalize()` will error out unless the
-optional boolean argument `{force}` is `true`.
-
-The `globalize()` function can be called multiple times; subsequent calls
-return the mapx module without modifying the global scope again, so you can
-safely call `globalize()` in multiple files without worry.
-
-Note that `globalize()` does not bind the |mapx-options| variables to the
-global scope, so you will still need to access them on the `mapx` table or use
-|mapx-option-strings|.
-
-==============================================================================
-3. Map Options                                                    *mapx-options*
+------------------------------------------------------------------------------
+3.2 Map Options                                               *mapx-map-options*
 
 For your convenience, this module exports the following variables:
 
-  Variable      Lua value
-  buffer        `{ buffer = true }`                                  *mapx.buffer*
-  nowait        `{ nowait = true }`                                  *mapx.nowait*
-  silent        `{ silent = true }`                                  *mapx.silent*
-  script        `{ script = true }`                                  *mapx.script*
-  expr          `{ expr   = true }`                                    *mapx.expr*
-  unique        `{ unique = true }`                                  *mapx.unique*
+  Variable      Lua value              String
+  buffer        `{ buffer = true }`      `"buffer"`                   *mapx.buffer*
+  nowait        `{ nowait = true }`      `"nowait"`                   *mapx.nowait*
+  silent        `{ silent = true }`      `"silent"`                   *mapx.silent*
+  script        `{ script = true }`      `"script"`                   *mapx.script*
+  expr          `{ expr   = true }`      `"expr"`                     *mapx.expr*
+  unique        `{ unique = true }`      `"unique"`                   *mapx.unique*
 
 These variables are intended to be passed as individual `{opts}` arguments to
 reduce boilerplate in your config. For example:
 >
-  mapx.inoremap([[<m.expr>]], [[<Tab> pumvisible() ? "\<C-n>" : "\<Tab>"]], mapx.silent, mapx.expr)
+  mapx.inoremap(
+    [[<m.expr>]],
+    [[<Tab> pumvisible() ? "\<C-n>" : "\<Tab>"]],
+    mapx.silent,
+    mapx.expr
+  )
 <
 Note that you don't need to use these variables, you are free to pass your own
 `{opts}` table(s):
 >
-  mapx.inoremap([[<m.expr>]], [[<Tab> pumvisible() ? "\<C-n>" : "\<Tab>"]], { silent = true, expr = true })
+  mapx.inoremap(
+    [[<m.expr>]],
+    [[<Tab> pumvisible() ? "\<C-n>" : "\<Tab>"]],
+    { silent = true, expr = true }
+  )
 <
 Alternatively, you can simply pass strings as options:     *mapx-option-strings*
 >
-  mapx.inoremap([[<m.expr>]], [[<Tab> pumvisible() ? "\<C-n>" : "\<Tab>"]], "silent", "expr")
+  mapx.inoremap(
+    [[<m.expr>]],
+    [[<Tab> pumvisible() ? "\<C-n>" : "\<Tab>"]],
+    "silent",
+    "expr"
+  )
 <
-See |:map-arguments| for more information on vim's map options.
+See |:map-arguments| and |nvim_set_keymap()| for more information on map options.
 
-==============================================================================
-4. Buffer-local Maps                                          *mapx-buffer-maps*
+------------------------------------------------------------------------------
+3.3 Buffer-local Maps                                         *mapx-buffer-maps*
 
 Unlike the builtin |nvim_set_keymap()| API, you are able to create
 buffer-local maps by passing `{ buffer = true }` as an option to the mapx
@@ -142,30 +186,57 @@ function, with a value of `0` (current buffer) for `{buffer}`.
 
 To create the map on a specific buffer, set `buffer` to the buffer's |bufnr|:
 >
- nnoremap("J", "5j", { buffer = 2 })
+  mapx.nnoremap("J", "5j", { buffer = 2 })
+<
+==============================================================================
+4. Examples                                                      *mapx-examples*
+
+Basic usage:
+>
+  local mapx = require'mapx'.setup()
+
+  mapx.map([[<C-z>]], [[<Nop>]])
+  mapx.mapbang([[<C-z>]], [[<Nop>]])
+
+  mapx.nnoremap([[j]], [[v:count ? 'j' : 'gj']], m.expr)
+  mapx.nnoremap([[k]], [[v:count ? 'k' : 'gk']], "expr")
+
+  mapx.nmap([[J]], [[5j]])
+  mapx.nmap([[K]], [[5k]])
 <
 
-==============================================================================
-5. Example Usage                                                  *mapx-example*
+With |mapx-config-global| enabled:
 >
-  local m = require'mapx'
+  local m = require'mapx'.setup({ global = true })
 
-  m.map([[<C-z>]], [[<Nop>]])
-  m.mapbang([[<C-z>]], [[<Nop>]])
+  map([[<C-z>]], [[<Nop>]])
+  mapbang([[<C-z>]], [[<Nop>]])
 
-  m.nnoremap([[j]], [[v:count ? 'j' : 'gj']], "expr")
-  m.nnoremap([[k]], [[v:count ? 'k' : 'gk']], "expr")
+  nnoremap([[j]], [[v:count ? 'j' : 'gj']], "expr")
+  nnoremap([[k]], [[v:count ? 'k' : 'gk']], "expr")
 
-  m.nmap([[J]], [[5j]])
-  m.nmap([[K]], [[5k]])
+  nmap([[J]], [[5j]])
+  nmap([[K]], [[5k]])
 
-  m.inoremap([[<Tab>]], [[pumvisible() ? "\<C-n>" : "\<Tab>"]], m.silent, m.expr)
-  m.inoremap([[<S-Tab>]], [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], m.silent, m.expr)
+  inoremap([[<Tab>]], [[pumvisible() ? "\<C-n>" : "\<Tab>"]], m.silent, m.expr)
+  inoremap([[<S-Tab>]], [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], m.silent, m.expr)
+<
 
+With multiple `{lhs}`'s:
+>
+  local m = require'mapx'.setup()
   m.nnoremap({[[<C-f>f]], [[<C-f><C-f>]]}, [[:lua require('telescope.builtin').find_files({previewer = false})<Cr>]], m.silent)
 <
+
+With |mapx-config-whichkey| support enabled:
+>
+  local m = require'mapx'.setup()
+  m.vnoremap([[<leader>y]], [["+y]], "Yank to system clipboard")
+  m.nnoremap([[<leader>Y]], [["+yg_]], "Yank until EOL to system clipboard")
+  m.nnoremap([[<leader>yy]], [["+yy]], "Yank line to system clipboard")
+<
 ==============================================================================
-6. Changelog                                                    *mapx-changelog*
+5. Changelog                                                    *mapx-changelog*
 
 28 Aug 2021: Added |mapx.globalize()|                                     v0.0.2
 27 Aug 2021: Initial Release                                            v0.0.1

@@ -25,7 +25,7 @@ vim.api.nvim_set_keymap("i", "<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]]
 With mapx:
 
 ```lua
-require'mapx'.globalize()
+require'mapx'.setup({ global = true })
 
 map("<C-z>", "<Nop>")
 mapbang("<C-z>", "<Nop>")
@@ -43,6 +43,16 @@ inoremap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "silent", "expr")
 nnoremap({"<C-f><C-f>", "<C-f>f"}, ":lua require('telescope.builtin').find_files()<Cr>", "silent")
 ```
 
+Mapx also supports integration with [which-key.nvim](https://github.com/folke/which-key.nvim):
+
+```lua
+require'mapx'.setup({ global = true, whichkey = true })
+
+-- These mappings will be labeled with the last string argument in the WhichKey popup:
+vnoremap ([[<leader>y]], [["+y]], "Yank to system clipboard")
+nnoremap ([[<leader>Y]], [["+yg_]], "Yank 'til EOL to system clipboard")
+```
+
 See [`:h mapx`](https://github.com/b0o/mapx.lua/blob/main/doc/mapx.txt) for the full documentation.
 
 ## Install
@@ -51,6 +61,13 @@ See [`:h mapx`](https://github.com/b0o/mapx.lua/blob/main/doc/mapx.txt) for the 
 
 ```lua
 use "b0o/mapx.lua"
+```
+
+## Changelog
+
+```
+28 Aug 2021: Added mapx.globalize()                                     v0.0.2
+27 Aug 2021: Initial Release                                            v0.0.1
 ```
 
 ## License
