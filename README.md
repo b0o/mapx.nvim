@@ -66,8 +66,16 @@ use "b0o/mapx.lua"
 ## Changelog
 
 ```
-28 Aug 2021: Added mapx.globalize()                                     v0.0.2
-27 Aug 2021: Initial Release                                            v0.0.1
+01 Sep 2021                                                             v0.1.0
+   Added `mapx.setup()`
+   Added `mapx-whichkey-support`
+   Breaking: Deprecated `mapx.globalize()` in favor of `setup({global = true})`
+
+28 Aug 2021                                                             v0.0.2
+  Added `mapx.globalize()`
+
+27 Aug 2021                                                             v0.0.1
+  Initial Release
 ```
 
 ## License
