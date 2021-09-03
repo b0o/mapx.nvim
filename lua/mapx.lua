@@ -86,7 +86,10 @@ local function _map(mode, _opts)
 end
 
 local function globalize(source, target, force, quiet)
-  local force = force or false
+  if globalized then
+    return target
+  end
+  force = force or false
   for k, v in pairs(source) do
     if target[k] ~= nil then
       local msg = 'overwriting key "' .. k .. '" in global scope'
@@ -109,7 +112,7 @@ local function try_require(pkg)
   end)
 end
 
-function mapx.globalize(...)
+function mapx.globalize()
   error("mapx.globalize() has been deprecated; use mapx.setup({ global = true })")
 end
 
@@ -117,7 +120,7 @@ function mapx.setup(config)
   if setup then
     return mapx
   end
-  local config = config or {}
+  config = config or {}
   if config.whichkey then
     local ok, wk = try_require('which-key')
     if not ok then
