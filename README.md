@@ -25,7 +25,7 @@ vim.api.nvim_set_keymap("i", "<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]]
 With mapx:
 
 ```lua
-require'mapx'.setup({ global = true })
+require'mapx'.setup{ global = true }
 
 map("<C-z>", "<Nop>")
 mapbang("<C-z>", "<Nop>")
@@ -46,11 +46,19 @@ nnoremap({"<C-f><C-f>", "<C-f>f"}, ":lua require('telescope.builtin').find_files
 Mapx also supports integration with [which-key.nvim](https://github.com/folke/which-key.nvim):
 
 ```lua
-require'mapx'.setup({ global = true, whichkey = true })
+require'mapx'.setup{ global = true, whichkey = true }
 
--- These mappings will be labeled with the last string argument in the WhichKey popup:
-vnoremap ([[<leader>y]], [["+y]], "Yank to system clipboard")
-nnoremap ([[<leader>Y]], [["+yg_]], "Yank 'til EOL to system clipboard")
+-- Add Which-Key labels to mappings
+vnoremap ("<leader>y", '"+y', "Yank to system clipboard")
+nnoremap ("<leader>Y", '"+yg_', "Yank until EOL to system clipboard")
+```
+
+Adding to the global namespace is optional:
+
+```lua
+local mapx = require'mapx'.setup{}
+mapx.nmap("J", "5j")
+mapx.nmap("K", "5k")
 ```
 
 See [`:h mapx`](https://github.com/b0o/mapx.lua/blob/main/doc/mapx.txt) for the full documentation.

@@ -86,7 +86,7 @@ All |mapx-map-functions| have the signature:                      *mapx-signatur
 The `{lhs}` argument can be an array-like table containing multiple `{lhs}`
 strings, allowing you to map multiple key combinations to the same action.
 
-`...{opts}` denotes variadic arguments of 0 or more `{opts}` arguments. Each
+`...{opts}` can be 0 or more `{opts}` arguments. Each
 `{opts}` argument should be an `{opts}` table containing options for the map
 (see |nvim_set_keymap()|).  All of these variadic table arguments will be
 merged into a single table. See |map-options| for more information.
@@ -193,7 +193,7 @@ To create the map on a specific buffer, set `buffer` to the buffer's |bufnr|:
 
 Basic usage:
 >
-  local mapx = require'mapx'.setup()
+  local mapx = require'mapx'.setup{}
 
   mapx.map([[<C-z>]], [[<Nop>]])
   mapx.mapbang([[<C-z>]], [[<Nop>]])
@@ -207,7 +207,7 @@ Basic usage:
 
 With |mapx-config-global| enabled:
 >
-  local m = require'mapx'.setup({ global = true })
+  local m = require'mapx'.setup{ global = true }
 
   map([[<C-z>]], [[<Nop>]])
   mapbang([[<C-z>]], [[<Nop>]])
@@ -224,13 +224,13 @@ With |mapx-config-global| enabled:
 
 With multiple `{lhs}`'s:
 >
-  local m = require'mapx'.setup()
+  local m = require'mapx'.setup{}
   m.nnoremap({[[<C-f>f]], [[<C-f><C-f>]]}, [[:lua require('telescope.builtin').find_files({previewer = false})<Cr>]], m.silent)
 <
 
 With |mapx-config-whichkey| support enabled:
 >
-  local m = require'mapx'.setup()
+  local m = require'mapx'.setup{ whichkey = true }
   m.vnoremap([[<leader>y]], [["+y]], "Yank to system clipboard")
   m.nnoremap([[<leader>Y]], [["+yg_]], "Yank until EOL to system clipboard")
   m.nnoremap([[<leader>yy]], [["+yy]], "Yank line to system clipboard")
