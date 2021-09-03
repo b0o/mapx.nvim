@@ -85,15 +85,17 @@ local function _map(mode, _opts)
   end
 end
 
-local function bind(source, target, force)
+local function globalize(source, target, force, quiet)
   local force = force or false
   for k, v in pairs(source) do
     if target[k] ~= nil then
-      local msg = 'mapx.bind: overwriting key ' .. k .. ' on ' .. string.format('%s', target)
+      local msg = 'overwriting key "' .. k .. '" in global scope'
       if force then
-        print('warning: ' .. msg .. ' {force = true}')
+        if not quiet then
+          print('mapx.global: warning: ' .. msg .. ' {force = true}')
+        end
       else
-        error(msg)
+        error('mapx.global: not' .. msg)
       end
     end
     target[k] = v
@@ -116,8 +118,6 @@ function mapx.setup(config)
     return mapx
   end
   local config = config or {}
-  mapx = merge(mapx, mapopts)
-
   if config.whichkey then
     local ok, wk = try_require('which-key')
     if not ok then
@@ -125,13 +125,12 @@ function mapx.setup(config)
     end
     whichkey = wk
   end
-
   if config.global then
     local forceGlobal = false
     if config.global == "force" then
       forceGlobal = true
     end
-    bind(fns, _G, forceGlobal)
+    globalize(fns, _G, forceGlobal, config.quiet or false)
     globalized = true
   end
   setup = true
@@ -146,7 +145,7 @@ for _, mode in ipairs {'', 'n', 'v', 'x', 's', 'o', 'i', 'l', 'c', 't'} do
 end
 fns.mapbang     = _map('!')
 fns.noremapbang = _map('!', { noremap = true })
-
-bind(fns, mapx)
+mapx = merge(mapx, fns)
+mapx = merge(mapx, mapopts)
 
 return mapx

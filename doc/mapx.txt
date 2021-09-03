@@ -62,6 +62,8 @@ is:
     If `true`, support for labeling keybinding with `which-key.nvim` is enabled.
     See |mapx-whichkey-support|.
 
+  config.quiet     bool          false                       *mapx-config-quiet*
+    Suppress warning messages.
 
 ------------------------------------------------------------------------------
 2.2 Which-Key Support                                    *mapx-whichkey-support*
