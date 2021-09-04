@@ -47,9 +47,24 @@ local function try_require(pkg)
   end)
 end
 
--- Deprecated!
-function mapx.globalize()
-  error("mapx.globalize() has been deprecated; use mapx.setup({ global = true })")
+-- merge 2 or more tables non-recursively
+local function merge(...)
+  local res = {}
+  for i = 1, select('#', ...) do
+    local arg = select(i, ...)
+    if type(arg) == 'table' then
+      for k, v in pairs(arg) do
+        res[k] = v
+      end
+    else
+      table.insert(res, arg)
+    end
+  end
+  return res
+end
+
+local function export()
+  return merge(mapx, mapopts)
 end
 
 -- Configure mapx
@@ -70,23 +85,12 @@ function mapx.setup(config)
     globalized = true
   end
   setup = true
-  return mapx
+  return export()
 end
 
--- merge 2 or more tables non-recursively
-local function merge(...)
-  local res = {}
-  for i = 1, select('#', ...) do
-    local arg = select(i, ...)
-    if type(arg) == 'table' then
-      for k, v in pairs(arg) do
-        res[k] = v
-      end
-    else
-      table.insert(res, arg)
-    end
-  end
-  return res
+-- Deprecated!
+function mapx.globalize()
+  error("mapx.globalize() has been deprecated; use mapx.setup({ global = true })")
 end
 
 -- Extract a WhichKey label which is either:
@@ -114,14 +118,19 @@ end
 -- table-based representation. Returns a new opts table with this expansion
 -- applied.
 local function expandStringOpts(opts)
-  local _opts = merge({}, opts)
-  for i, o in ipairs(_opts) do
-    if type(o) == 'string' and mapopts[o] ~= nil then
-      _opts[o] = true
-      table.remove(_opts, i)
+  local res = {}
+  for k, v in pairs(opts) do
+    if type(k) == "number" then
+      if type(v) == 'string' and mapopts[v] ~= nil then
+        res[v] = true
+      else
+        table.insert(res, v)
+      end
+    else
+      res[k] = v
     end
   end
-  return _opts
+  return res
 end
 
 local function mapWhichKey(mode, lhs, rhs, opts, label)
@@ -314,4 +323,4 @@ function mapx.cnoremap(lhs, rhs, ...) return _map('c', { noremap = true }, lhs, 
 -- @param  label string       Optional label for which-key.nvim
 function mapx.tnoremap(lhs, rhs, ...) return _map('t', { noremap = true }, lhs, rhs, ...) end
 
-return merge(mapx, mapopts)
+return export()
