@@ -145,8 +145,8 @@ local function mapWhichKey(mode, lhs, rhs, opts, label)
   }, wkopts)
 end
 
-local function _map(mode, _opts, lhss, rhs, ...)
-  local opts = merge({}, _opts, ...)
+local function _map(mode, lhss, rhs, ...)
+  local opts = merge({}, ...)
   opts = expandStringOpts(opts)
   local label
   if whichkey ~= nil then
@@ -185,153 +185,153 @@ end
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.map(lhs, rhs, ...) return _map('', {}, lhs, rhs, ...) end
+function mapx.map(lhs, rhs, ...) return _map('', lhs, rhs, ...) end
 
 -- Create a Normal mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.nmap(lhs, rhs, ...) return _map('n', {}, lhs, rhs, ...) end
+function mapx.nmap(lhs, rhs, ...) return _map('n', lhs, rhs, ...) end
 
 -- Create a Normal and Command mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.mapbang(lhs, rhs, ...) return _map('!', {}, lhs, rhs, ...) end
+function mapx.mapbang(lhs, rhs, ...) return _map('!', lhs, rhs, ...) end
 
 -- Create a Visual and Select mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.vmap(lhs, rhs, ...) return _map('v', {}, lhs, rhs, ...) end
+function mapx.vmap(lhs, rhs, ...) return _map('v', lhs, rhs, ...) end
 
 -- Create a Visual mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.xmap(lhs, rhs, ...) return _map('x', {}, lhs, rhs, ...) end
+function mapx.xmap(lhs, rhs, ...) return _map('x', lhs, rhs, ...) end
 
 -- Create a Select mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.smap(lhs, rhs, ...) return _map('s', {}, lhs, rhs, ...) end
+function mapx.smap(lhs, rhs, ...) return _map('s', lhs, rhs, ...) end
 
 -- Create an Operator-pending mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.omap(lhs, rhs, ...) return _map('o', {}, lhs, rhs, ...) end
+function mapx.omap(lhs, rhs, ...) return _map('o', lhs, rhs, ...) end
 
 -- Create an Insert mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.imap(lhs, rhs, ...) return _map('i', {}, lhs, rhs, ...) end
+function mapx.imap(lhs, rhs, ...) return _map('i', lhs, rhs, ...) end
 
 -- Create an Insert, Command, and Lang-arg mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.lmap(lhs, rhs, ...) return _map('l', {}, lhs, rhs, ...) end
+function mapx.lmap(lhs, rhs, ...) return _map('l', lhs, rhs, ...) end
 
 -- Create a Command mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.cmap(lhs, rhs, ...) return _map('c', {}, lhs, rhs, ...) end
+function mapx.cmap(lhs, rhs, ...) return _map('c', lhs, rhs, ...) end
 
 -- Create a Terminal mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.tmap(lhs, rhs, ...) return _map('t', {}, lhs, rhs, ...) end
+function mapx.tmap(lhs, rhs, ...) return _map('t', lhs, rhs, ...) end
 
 -- Create a non-recursive Normal, Visual, Select, and Operator-pending mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.noremap(lhs, rhs, ...) return _map('', { noremap = true }, lhs, rhs, ...) end
+function mapx.noremap(lhs, rhs, ...) return _map('', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Normal mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.nnoremap(lhs, rhs, ...) return _map('n', { noremap = true }, lhs, rhs, ...) end
+function mapx.nnoremap(lhs, rhs, ...) return _map('n', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Normal and Command mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.noremapbang(lhs, rhs, ...) return _map('!', { noremap = true }, lhs, rhs, ...) end
+function mapx.noremapbang(lhs, rhs, ...) return _map('!', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Visual and Select mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.vnoremap(lhs, rhs, ...) return _map('v', { noremap = true }, lhs, rhs, ...) end
+function mapx.vnoremap(lhs, rhs, ...) return _map('v', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Visual mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.xnoremap(lhs, rhs, ...) return _map('x', { noremap = true }, lhs, rhs, ...) end
+function mapx.xnoremap(lhs, rhs, ...) return _map('x', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Select mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.snoremap(lhs, rhs, ...) return _map('s', { noremap = true }, lhs, rhs, ...) end
+function mapx.snoremap(lhs, rhs, ...) return _map('s', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Operator-pending mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.onoremap(lhs, rhs, ...) return _map('o', { noremap = true }, lhs, rhs, ...) end
+function mapx.onoremap(lhs, rhs, ...) return _map('o', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Insert mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.inoremap(lhs, rhs, ...) return _map('i', { noremap = true }, lhs, rhs, ...) end
+function mapx.inoremap(lhs, rhs, ...) return _map('i', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Insert, Command, and Lang-arg mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.lnoremap(lhs, rhs, ...) return _map('l', { noremap = true }, lhs, rhs, ...) end
+function mapx.lnoremap(lhs, rhs, ...) return _map('l', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Command mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.cnoremap(lhs, rhs, ...) return _map('c', { noremap = true }, lhs, rhs, ...) end
+function mapx.cnoremap(lhs, rhs, ...) return _map('c', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Terminal mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.tnoremap(lhs, rhs, ...) return _map('t', { noremap = true }, lhs, rhs, ...) end
+function mapx.tnoremap(lhs, rhs, ...) return _map('t', lhs, rhs, { noremap = true }, ...) end
 
 return export()
