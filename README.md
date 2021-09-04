@@ -55,6 +55,16 @@ require'mapx'.setup{ global = true, whichkey = true }
 nnoremap("gD", "<cmd>lua vim.lsp.buf.declaration()<Cr>", "silent", "LSP: Goto declaration")
 ```
 
+Map Lua functions:
+
+```lua
+map("<leader>hi", function() print("Hello!") end, "silent")
+
+-- Expression maps work too:
+nnoremap("j", function(count) return count > 0 and "j" or "gj" end, "silent", "expr")
+nnoremap("k", function(count) return count > 0 and "k" or "gk" end, "silent", "expr")
+```
+
 There are various ways to specify map options:
 
 ```lua

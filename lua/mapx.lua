@@ -1,4 +1,6 @@
-local mapx = {}
+local mapx = {
+  fn = {},
+}
 local mapopts = {
   buffer = { buffer = true },
   nowait = { nowait = true },
@@ -16,16 +18,16 @@ local function globalize(force, quiet)
     return _G
   end
   force = force or false
-  local fns = {}
+  local mapFuncs = {}
   for _, mode in ipairs {'', 'n', 'v', 'x', 's', 'o', 'i', 'l', 'c', 't'} do
     local m = mode .. 'map'
     local n = mode .. 'noremap'
-    fns[m] = mapx[m]
-    fns[n] = mapx[n]
+    mapFuncs[m] = mapx[m]
+    mapFuncs[n] = mapx[n]
   end
-  fns.mapbang = mapx.mapbang
-  fns.noremapbang = mapx.noremapbang
-  for k, v in pairs(fns) do
+  mapFuncs.mapbang = mapx.mapbang
+  mapFuncs.noremapbang = mapx.noremapbang
+  for k, v in pairs(mapFuncs) do
     if _G[k] ~= nil then
       local msg = 'overwriting key "' .. k .. '" in global scope'
       if force then
@@ -152,6 +154,15 @@ local function _map(mode, _opts, lhss, rhs, ...)
   end
   if type(lhss) ~= 'table' then
     lhss = {lhss}
+  end
+  if type(rhs) == 'function' then
+    table.insert(mapx.fn, rhs)
+    local luaexpr = "require'mapx'.fn[" .. #mapx.fn .. "](vim.v.count)"
+    if opts.expr then
+      rhs = 'luaeval("' .. luaexpr .. '")'
+    else
+      rhs = ":lua " .. luaexpr .. "<cr>"
+    end
   end
   for _, lhs in ipairs(lhss) do
     if label ~= nil then

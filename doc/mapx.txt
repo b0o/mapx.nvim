@@ -16,6 +16,7 @@ CONTENTS                                                         *mapx-contents*
       3.1. Map Functions .................... |mapx-map-functions|
       3.2. Map Options ...................... |mapx-map-options|
       3.3. Buffer-local Maps ................ |mapx-buffer-maps|
+      3.3. Lua Function Maps ................ |mapx-lua-maps|
     4. Examples ............................. |mapx-examples|
     5. Changelog ............................ |mapx-changelog|
     6. License .............................. |mapx-license|
@@ -195,6 +196,14 @@ To create the map on a specific buffer, set `buffer` to the buffer's |bufnr|:
 >
   mapx.nnoremap("J", "5j", { buffer = 2 })
 <
+------------------------------------------------------------------------------
+3.4 Lua Function Maps                                            *mapx-lua-maps*
+
+Mapx supports Lua functions as the `{rhs}` of a map. The function will be
+called with a single argument, the value of vim's |v:count| special variable.
+
+In a |:map-<expr>|, the function's return value will become the ultimate `{rhs}`.
+
 ==============================================================================
 4. Examples                                                      *mapx-examples*
 
