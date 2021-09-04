@@ -9,9 +9,6 @@ ergonomic.
 Before mapx:
 
 ```lua
-vim.api.nvim_set_keymap("", "<C-z>", "<Nop>")
-vim.api.nvim_set_keymap("!", "<C-z>", "<Nop>")
-
 vim.api.nvim_set_keymap("n", "j", "v:count ? 'j' : 'gj'", { noremap = true, expr = true })
 vim.api.nvim_set_keymap("n", "k", "v:count ? 'k' : 'gk'", { noremap = true, expr = true })
 
@@ -20,15 +17,14 @@ vim.api.nvim_set_keymap("n", "K", "5k")
 
 vim.api.nvim_set_keymap("i", "<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], { noremap = true, silent = true, expr = true })
 vim.api.nvim_set_keymap("i", "<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], { noremap = true, silent = true, expr = true })
+
+vim.api.nvim_set_keymap("", "<M-/>", ":Commentary<Cr>", { silent = true })
 ```
 
 With mapx:
 
 ```lua
 require'mapx'.setup{ global = true }
-
-map("<C-z>", "<Nop>")
-mapbang("<C-z>", "<Nop>")
 
 nnoremap("j", "v:count ? 'j' : 'gj'", "expr")
 nnoremap("k", "v:count ? 'k' : 'gk'", "expr")
@@ -39,24 +35,54 @@ nmap("K", "5k")
 inoremap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "silent", "expr")
 inoremap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "silent", "expr")
 
--- Map multiple key combinations to the same action
+map("<M-/>", ":Commentary<Cr>", "silent")
+```
+
+## Features
+
+Create multiple mappings to the same action in one shot:
+
+```lua
 nnoremap({"<C-f><C-f>", "<C-f>f"}, ":lua require('telescope.builtin').find_files()<Cr>", "silent")
 ```
 
-Mapx also supports integration with [which-key.nvim](https://github.com/folke/which-key.nvim):
+Integrate with [which-key.nvim](https://github.com/folke/which-key.nvim) by
+passing a label as the final argument:
 
 ```lua
 require'mapx'.setup{ global = true, whichkey = true }
 
--- Add Which-Key labels to mappings
-vnoremap ("<leader>y", '"+y', "Yank to system clipboard")
-nnoremap ("<leader>Y", '"+yg_', "Yank until EOL to system clipboard")
+nnoremap("gD", "<cmd>lua vim.lsp.buf.declaration()<Cr>", "silent", "LSP: Goto declaration")
 ```
 
-Adding to the global namespace is optional:
+There are various ways to specify map options:
 
 ```lua
-local mapx = require'mapx'.setup{}
+-- Lua tables
+nnoremap ("j", "v:count ? 'j' : 'gj'", { silent = true, expr = true })
+
+-- Multiple lua tables
+nnoremap ("j", "v:count ? 'j' : 'gj'", { silent = true }, { expr = true })
+
+-- Mapx's exported convenience variables
+nnoremap ("j", "v:count ? 'j' : 'gj'", mapx.silent, mapx.expr)
+
+-- Strings
+nnoremap ("j", "v:count ? 'j' : 'gj'", "silent", "expr")
+```
+
+Create buffer maps:
+
+```lua
+nnoremap("<C-]>", ":call man#get_page_from_cword('horizontal', v:count)<CR>", "silent", {
+  buffer = vim.api.nvim_win_get_buf(myWindowVariable)
+})
+```
+
+Adding the map functions to the global scope is optional:
+
+```lua
+local mapx = require'mapx'
 mapx.nmap("J", "5j")
 mapx.nmap("K", "5k")
 ```
