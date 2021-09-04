@@ -78,6 +78,11 @@ Once enabled, any |mapx-map-functions| can receive a final string argument to
 add a label the the mapping which will be shown by `which-key.nvim` (see
 |mapx-signature|).
 
+Alternatively, one of the |mapx-map-options| table arguments can contain a
+`label` key:
+>
+  mapx.map("<leader>dtt", ":DoTheThing()<cr>", { label = "Do the thing", silent = true })
+
 ==============================================================================
 3. API                                                                *mapx-api*
 
