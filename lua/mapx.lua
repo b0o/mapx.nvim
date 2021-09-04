@@ -1,5 +1,4 @@
 local mapx = {}
-
 local mapopts = {
   buffer = { buffer = true },
   nowait = { nowait = true },
@@ -8,7 +7,6 @@ local mapopts = {
   expr   = { expr   = true },
   unique = { unique = true },
 }
-
 local setup = false
 local globalized = false
 local whichkey = nil
@@ -316,5 +314,4 @@ function mapx.cnoremap(lhs, rhs, ...) return _map('c', { noremap = true }, lhs, 
 -- @param  label string       Optional label for which-key.nvim
 function mapx.tnoremap(lhs, rhs, ...) return _map('t', { noremap = true }, lhs, rhs, ...) end
 
-mapx = merge(mapx, mapopts)
-return mapx
+return merge(mapx, mapopts)
