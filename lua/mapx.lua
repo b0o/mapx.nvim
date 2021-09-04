@@ -161,7 +161,7 @@ local function _map(mode, _opts, lhss, rhs, ...)
     if opts.expr then
       rhs = 'luaeval("' .. luaexpr .. '")'
     else
-      rhs = ":lua " .. luaexpr .. "<cr>"
+      rhs = "<Cmd>lua " .. luaexpr .. "<Cr>"
     end
   end
   for _, lhs in ipairs(lhss) do
