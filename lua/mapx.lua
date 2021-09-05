@@ -225,7 +225,7 @@ local function _map(mode, lhss, rhs, ...)
   if ft ~= nil then
     opts.ft = nil
     opts.filetype = nil
-    opts.buffer = true
+    opts.buffer = opts.buffer or 0
     ftmap(ft, function() _map(mode, lhss, rhs, opts) end)
     return
   end
@@ -233,6 +233,9 @@ local function _map(mode, lhss, rhs, ...)
   local label
   if state.whichkey ~= nil then
     label, opts = extractLabel(opts)
+  end
+  if opts.buffer == true then
+    opts.buffer = 0
   end
   if type(lhss) ~= 'table' then
     lhss = {lhss}
