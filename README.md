@@ -107,6 +107,10 @@ nnoremap ("j", "v:count ? 'j' : 'gj'", "<silent>", "<expr>")
 Create buffer maps:
 
 ```lua
+-- Use the current buffer
+nnoremap("<C-]>", ":call man#get_page_from_cword('horizontal', v:count)<CR>", "silent", "buffer")
+
+-- Use a specific buffer
 nnoremap("<C-]>", ":call man#get_page_from_cword('horizontal', v:count)<CR>", "silent", {
   buffer = vim.api.nvim_win_get_buf(myWindowVariable)
 })
