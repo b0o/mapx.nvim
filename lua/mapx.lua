@@ -191,12 +191,13 @@ local function extractLabel(opts)
 end
 
 -- Expands string-based options like "buffer", "silent", "expr" to their
--- table-based representation. Returns a new opts table with this expansion
--- applied.
+-- table-based representation. Also supports <wrapped> strings "<buffer>"
+-- Returns a new opts table with this expansion applied.
 local function expandStringOpts(opts)
   local res = {}
   for k, v in pairs(opts) do
     if type(k) == "number" then
+      v = (type(v) == "string" and vim.fn.substitute(v, [[^<\|>$]], "", "g")) or v
       if type(v) == 'string' and mapopts[v] ~= nil then
         res[v] = true
       else

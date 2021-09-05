@@ -206,6 +206,16 @@ Alternatively, you can simply pass strings as options:     *mapx-option-strings*
     "expr"
   )
 <
+Strings can optionally be wrapped with <angle brackets>:
+>
+  mapx.inoremap(
+    [[<m.expr>]],
+    [[<Tab> pumvisible() ? "\<C-n>" : "\<Tab>"]],
+    "<silent>",
+    "<expr>"
+  )
+<
+
 See |:map-arguments| and |nvim_set_keymap()| for more information on map options.
 
 ------------------------------------------------------------------------------

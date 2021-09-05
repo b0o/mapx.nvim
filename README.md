@@ -91,7 +91,7 @@ There are various ways to specify map options:
 -- Lua tables
 nnoremap ("j", "v:count ? 'j' : 'gj'", { silent = true, expr = true })
 
--- Multiple lua tables
+-- Multiple Lua tables
 nnoremap ("j", "v:count ? 'j' : 'gj'", { silent = true }, { expr = true })
 
 -- Mapx's exported convenience variables
@@ -99,6 +99,9 @@ nnoremap ("j", "v:count ? 'j' : 'gj'", mapx.silent, mapx.expr)
 
 -- Strings
 nnoremap ("j", "v:count ? 'j' : 'gj'", "silent", "expr")
+
+-- Vim-style strings
+nnoremap ("j", "v:count ? 'j' : 'gj'", "<silent>", "<expr>")
 ```
 
 Create buffer maps:
