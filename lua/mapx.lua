@@ -31,7 +31,40 @@ vim.cmd([[
 
 local function dbg(...)
   if not state.config.debug then return end
-  print(...)
+  local function getpwin()
+    for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+     if vim.fn.win_gettype(w) == "preview" then
+       return w
+     end
+   end
+  end
+  local pwin = getpwin()
+  if pwin == nil then
+    vim.cmd(string.format("pedit +%s mapx_debug", table.concat({
+      'setlocal',
+      'nomodifiable',
+      'buftype=nofile',
+      'bufhidden=hide',
+      'nobuflisted',
+      'noswapfile',
+      'nonumber',
+      'norelativenumber',
+      'nomodeline',
+      'nolist',
+      'scrolloff=0',
+    }, "\\ ")))
+    pwin = getpwin()
+  end
+  if pwin == nil then
+    print(...)
+    return
+  end
+  local msg = string.format("[%s] %s\n", os.date "%H:%M:%S", table.concat({...}, " "))
+  local pbuf = vim.api.nvim_win_get_buf(pwin)
+  vim.api.nvim_buf_set_option(pbuf, "modifiable", true)
+  vim.api.nvim_buf_set_lines(pbuf, -1, -1, false, vim.split(msg, "\n", true))
+  vim.api.nvim_buf_set_option(pbuf, "modifiable", false)
+  vim.api.nvim_win_set_cursor(pwin, {vim.api.nvim_buf_line_count(pbuf), 0})
 end
 
 local function dbgi(...)
@@ -45,7 +78,7 @@ local function dbgi(...)
       table.insert(msg, v)
     end
   end
-  print(table.concat(msg, " "))
+  dbg(table.concat(msg, " "))
 end
 
 local function globalize(force, quiet)
