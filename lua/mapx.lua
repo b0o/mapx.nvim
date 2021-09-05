@@ -269,11 +269,12 @@ local function _map(mode, lhss, rhs, ...)
   end
   opts = expandStringOpts(opts)
   local label
-  if state.whichkey ~= nil then
-    label, opts = extractLabel(opts)
-  end
+  local wkopts
   if opts.buffer == true then
     opts.buffer = 0
+  end
+  if state.whichkey ~= nil then
+    label, wkopts = extractLabel(opts)
   end
   if type(lhss) ~= 'table' then
     lhss = {lhss}
@@ -291,17 +292,14 @@ local function _map(mode, lhss, rhs, ...)
     end
   end
   for _, lhs in ipairs(lhss) do
-    if label ~= nil then
-      dbgi("_map whichkey", {mode=mode, lhs=lhs, rhs=rhs, opts=opts, label=label})
-      mapWhichKey(mode, lhs, rhs, opts, label)
-    elseif opts.buffer ~= nil then
-      local b = 0
-      if type(opts.buffer) ~= 'boolean' then
-        b = opts.buffer
-      end
-      opts.buffer = nil
-      dbgi("_map buffer",{b=b, mode=mode, lhs=lhs, rhs=rhs, opts=opts})
-      vim.api.nvim_buf_set_keymap(b, mode, lhs, rhs, opts)
+    if label then
+      dbgi("_map whichkey", {mode=mode, lhs=lhs, rhs=rhs, wkopts=wkopts, label=label})
+      mapWhichKey(mode, lhs, rhs, wkopts, label)
+    elseif opts.buffer then
+      local bopts = merge({}, opts)
+      bopts.buffer = nil
+      dbgi("_map buffer",{mode=mode, lhs=lhs, rhs=rhs, opts=opts, bopts=bopts})
+      vim.api.nvim_buf_set_keymap(opts.buffer, mode, lhs, rhs, bopts)
     else
       dbgi("_map",{mode=mode, lhs=lhs, rhs=rhs, opts=opts})
       vim.api.nvim_set_keymap(mode, lhs, rhs, opts)
