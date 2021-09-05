@@ -55,6 +55,13 @@ require'mapx'.setup{ global = true, whichkey = true }
 nnoremap("gD", "<cmd>lua vim.lsp.buf.declaration()<Cr>", "silent", "LSP: Goto declaration")
 ```
 
+Create FileType maps:
+
+```lua
+nnoremap("<tab>",   [[:call search('\(\w\+(\w\+)\)', 's')<Cr>]],  "silent", { ft = "man" })
+nnoremap("<S-tab>", [[:call search('\(\w\+(\w\+)\)', 'sb')<Cr>]], "silent", { ft = "man" })
+```
+
 Map Lua functions:
 
 ```lua

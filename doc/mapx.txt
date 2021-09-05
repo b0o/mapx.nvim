@@ -142,15 +142,33 @@ Mapx also offers "bang" (|:map!| and |:noremap!|) variants:              *mapx-b
 ------------------------------------------------------------------------------
 3.2 Map Options                                               *mapx-map-options*
 
-For your convenience, this module exports the following variables:
+The mapx map functions accept all of the same options as |nvim_set_keymap()|
+as well as mapx-specific options. Mapx-specific options include:
+
+  Option           Type          Default
+  buffer           bool|number   nil                           *mapx-opt-buffer*
+    If true or the number 0, the map is local to the current buffer.
+    If >0, the map is local to the buffer with that number.
+
+  filetype         string|table  nil                         *mapx-opt-filetype*
+    If a string, the mapping only applies to buffers with a matching filetype.
+    If a list-like table, the mapping applies to all of the listed filetypes.
+    The shorthand key `ft` can be used for this option.
+    Filetype mappings are applied via a |FileType| autocommand.
+    Implies `{ buffer = 0 }`
+
+  label            string        nil                            *mapx-opt-label*
+    Sets the which-key label. See |mapx-whichkey-support|.
+
+For your convenience, mapx exports the following:             *mapx-option-vars*
 
   Variable      Lua value              String
-  buffer        `{ buffer = true }`      `"buffer"`                   *mapx.buffer*
-  nowait        `{ nowait = true }`      `"nowait"`                   *mapx.nowait*
-  silent        `{ silent = true }`      `"silent"`                   *mapx.silent*
-  script        `{ script = true }`      `"script"`                   *mapx.script*
-  expr          `{ expr   = true }`      `"expr"`                     *mapx.expr*
-  unique        `{ unique = true }`      `"unique"`                   *mapx.unique*
+  buffer        `{ buffer = 0 }`         `"buffer"`                    *mapx.buffer*
+  nowait        `{ nowait = true }`      `"nowait"`                    *mapx.nowait*
+  silent        `{ silent = true }`      `"silent"`                    *mapx.silent*
+  script        `{ script = true }`      `"script"`                    *mapx.script*
+  expr          `{ expr   = true }`      `"expr"`                        *mapx.expr*
+  unique        `{ unique = true }`      `"unique"`                    *mapx.unique*
 
 These variables are intended to be passed as individual `{opts}` arguments to
 reduce boilerplate in your config. For example:

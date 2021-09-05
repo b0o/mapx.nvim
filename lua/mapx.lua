@@ -1,5 +1,6 @@
 local mapx = {
-  fn = {},
+  funcs = {},
+  ftmaps = {},
 }
 local mapopts = {
   buffer = { buffer = true },
@@ -12,6 +13,13 @@ local mapopts = {
 local setup = false
 local globalized = false
 local whichkey = nil
+
+vim.cmd([[
+  augroup mapx
+    autocmd!
+    autocmd VimEnter * lua require'mapx'._handleVimEnter()
+  augroup END
+]])
 
 local function globalize(force, quiet)
   if globalized then
@@ -145,8 +153,41 @@ local function mapWhichKey(mode, lhs, rhs, opts, label)
   }, wkopts)
 end
 
+local function ftmap(ft, fn)
+  if mapx.ftmaps[ft] == nil then
+    mapx.ftmaps[ft] = {}
+  end
+  table.insert(mapx.ftmaps[ft], fn)
+end
+
+function mapx._handleFileType(ft)
+  if mapx.ftmaps[ft] == nil then
+    return
+  end
+  for _, fn in ipairs(mapx.ftmaps[ft]) do
+    fn()
+  end
+end
+
+function mapx._handleVimEnter()
+  vim.cmd(string.format([[
+    augroup mapx_ftmap
+      autocmd!
+      autocmd FileType %s lua require'mapx'._handleFileType(vim.fn.expand('<amatch>'))
+    augroup END
+  ]], table.concat(vim.tbl_keys(mapx.ftmaps), ",")))
+end
+
 local function _map(mode, lhss, rhs, ...)
   local opts = merge({}, ...)
+  local ft = opts.filetype or opts.ft
+  if ft ~= nil then
+    opts.ft = nil
+    opts.filetype = nil
+    opts.buffer = true
+    ftmap(ft, function() _map(mode, lhss, rhs, opts) end)
+    return
+  end
   opts = expandStringOpts(opts)
   local label
   if whichkey ~= nil then
@@ -156,8 +197,8 @@ local function _map(mode, lhss, rhs, ...)
     lhss = {lhss}
   end
   if type(rhs) == 'function' then
-    table.insert(mapx.fn, rhs)
-    local luaexpr = "require'mapx'.fn[" .. #mapx.fn .. "](vim.v.count)"
+    table.insert(mapx.funcs, rhs)
+    local luaexpr = "require'mapx'.funcs[" .. #mapx.funcs .. "](vim.v.count)"
     if opts.expr then
       rhs = 'luaeval("' .. luaexpr .. '")'
     else
