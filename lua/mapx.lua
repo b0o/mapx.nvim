@@ -197,9 +197,9 @@ local function expandStringOpts(opts)
   local res = {}
   for k, v in pairs(opts) do
     if type(k) == "number" then
-      v = (type(v) == "string" and vim.fn.substitute(v, [[^<\|>$]], "", "g")) or v
-      if type(v) == 'string' and mapopts[v] ~= nil then
-        res[v] = true
+      local vsub = type(v) == "string" and vim.fn.substitute(v, [[^<\|>$]], "", "g")
+      if vsub and mapopts[vsub] ~= nil then
+        res[vsub] = true
       else
         table.insert(res, v)
       end
