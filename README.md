@@ -62,6 +62,15 @@ nnoremap("<tab>",   [[:call search('\(\w\+(\w\+)\)', 's')<Cr>]],  "silent", { ft
 nnoremap("<S-tab>", [[:call search('\(\w\+(\w\+)\)', 'sb')<Cr>]], "silent", { ft = "man" })
 ```
 
+Group maps with common options to reduce repetition:
+
+```lua
+mapx.group("silent", { ft = "man" }, function()
+  nnoremap("<tab>",   [[:call search('\(\w\+(\w\+)\)', 's')<Cr>]])
+  nnoremap("<S-tab>", [[:call search('\(\w\+(\w\+)\)', 'sb')<Cr>]])
+end)
+```
+
 Map Lua functions:
 
 ```lua

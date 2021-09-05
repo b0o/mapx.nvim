@@ -15,8 +15,9 @@ CONTENTS                                                         *mapx-contents*
     3. API .................................. |mapx-api|
       3.1. Map Functions .................... |mapx-map-functions|
       3.2. Map Options ...................... |mapx-map-options|
-      3.3. Buffer-local Maps ................ |mapx-buffer-maps|
-      3.3. Lua Function Maps ................ |mapx-lua-maps|
+      3.3. Map Groups ....................... |mapx-map-groups|
+      3.4. Buffer-local Maps ................ |mapx-buffer-maps|
+      3.5. Lua Function Maps ................ |mapx-lua-maps|
     4. Examples ............................. |mapx-examples|
     5. Changelog ............................ |mapx-changelog|
     6. License .............................. |mapx-license|
@@ -82,8 +83,7 @@ Once enabled, any |mapx-map-functions| can receive a final string argument to
 add a label the the mapping which will be shown by `which-key.nvim` (see
 |mapx-signature|).
 
-Alternatively, one of the |mapx-map-options| table arguments can contain a
-`label` key:
+Alternatively, use the |mapx-opt-label| map option:
 >
   mapx.map("<leader>dtt", ":DoTheThing()<cr>", { label = "Do the thing", silent = true })
 
@@ -94,14 +94,19 @@ All |mapx-map-functions| have the signature:                      *mapx-signatur
 >
     f({lhs}, {rhs}[, ...{opts}[, {whichkey-label}]])
 <
-The `{lhs}` argument can be an array-like table containing multiple `{lhs}`
+Where `f` is the map function.
+
+                                                            *mapx-signature-lhs*
+The `{lhs}` argument can be a list-like table containing multiple `{lhs}`
 strings, allowing you to map multiple key combinations to the same action.
 
-`...{opts}` can be 0 or more `{opts}` arguments. Each
-`{opts}` argument should be an `{opts}` table containing options for the map
-(see |nvim_set_keymap()|).  All of these variadic table arguments will be
-merged into a single table. See |map-options| for more information.
+                                                           *mapx-signature-opts*
+`...{opts}` can be 0 or more |map-option| arguments. Each `{opts}` argument
+should be an `{opts}` table containing options for the map (see
+|nvim_set_keymap()|). All of these variadic table arguments will be merged
+into a single table.
 
+                                                       *mapx-signature-whichkey*
 If |mapx-whichkey-support| is enabled, the final argument can be a string that
 labels the keybinding with which-key.nvim. The label can't be a string that
 conflicts with |mapx-option-strings|.
@@ -204,7 +209,45 @@ Alternatively, you can simply pass strings as options:     *mapx-option-strings*
 See |:map-arguments| and |nvim_set_keymap()| for more information on map options.
 
 ------------------------------------------------------------------------------
-3.3 Buffer-local Maps                                         *mapx-buffer-maps*
+3.3 Map Groups                                                 *mapx-map-groups*
+
+Mappings with shared |mapx-map-options| can be grouped with the `group`
+function:
+
+  mapx.group(...{opts}, {group-fn})                               *mapx.group()*
+>
+The `...{opts}` argument(s) are exactly as described in |mapx-signature-opts|,
+except that |whichkey-opt-label| opts are not allowed.
+
+The `{group-fn}` argument is a Lua function that will be called immediately to
+set up any mapx maps defined within it.
+>
+Within a group, all options set on the group will be set on maps created
+within the group. Options set on individual maps within a group are merged
+with the group opts, with the map's opts taking precedence over the group opts
+when conflicting.
+
+Groups can be nested; nested groups' opts are merged with their parent group's
+opts, with the nested group's opts taking precedence over the group opts when
+conflicting.
+
+Map groups are especially useful for |mapx-opt-filetype| maps.
+
+For example, A and B are equivalent:
+>
+  -- A. Without grouping:
+  nnoremap("<tab>",   [[:call search('\(\w\+(\w\+)\)', 's')<Cr>]],  "silent", { ft = "man" })
+  nnoremap("<S-tab>", [[:call search('\(\w\+(\w\+)\)', 'sb')<Cr>]], "silent", { ft = "man" })
+
+  -- B. With grouping:
+  mapx.group("silent", { ft = "man" }, function()
+    nnoremap("<tab>",   [[:call search('\(\w\+(\w\+)\)', 's')<Cr>]])
+    nnoremap("<S-tab>", [[:call search('\(\w\+(\w\+)\)', 'sb')<Cr>]])
+  end)
+<
+
+------------------------------------------------------------------------------
+3.4 Buffer-local Maps                                         *mapx-buffer-maps*
 
 Unlike the builtin |nvim_set_keymap()| API, you are able to create
 buffer-local maps by passing `{ buffer = true }` as an option to the mapx
@@ -218,7 +261,7 @@ To create the map on a specific buffer, set `buffer` to the buffer's |bufnr|:
   mapx.nnoremap("J", "5j", { buffer = 2 })
 <
 ------------------------------------------------------------------------------
-3.4 Lua Function Maps                                            *mapx-lua-maps*
+3.5 Lua Function Maps                                            *mapx-lua-maps*
 
 Mapx supports Lua functions as the `{rhs}` of a map. The function will be
 called with a single argument, the value of vim's |v:count| special variable.

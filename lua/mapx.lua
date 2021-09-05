@@ -257,8 +257,28 @@ function mapx._handleVimEnter()
   ]], table.concat(vim.tbl_keys(state.ftmaps), ",")))
 end
 
+function mapx.group(...)
+  local prevOpts = state.groupOpts
+  local fn
+  local args = {...}
+  for i, v in ipairs(args) do
+    if i < #args then
+      state.groupOpts = merge(state.groupOpts, v)
+    else
+      fn = v
+    end
+  end
+  dbgi("group", state.groupOpts)
+  local label = extractLabel(state.groupOpts)
+  if label ~= nil then
+    error("mapx.group: cannot set label on group: " .. tostring(label))
+  end
+  fn()
+  state.groupOpts = prevOpts
+end
+
 local function _map(mode, lhss, rhs, ...)
-  local opts = merge({}, ...)
+  local opts = merge({}, state.groupOpts, ...)
   local ft = opts.filetype or opts.ft
   if ft ~= nil then
     opts.ft = nil
