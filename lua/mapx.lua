@@ -245,7 +245,7 @@ end
 function mapx._handleFunc(id, ...)
   local fn = state.funcs[id]
   if fn == nil then return end
-  fn(...)
+  return fn(...)
 end
 
 function mapx._handleVimEnter()
