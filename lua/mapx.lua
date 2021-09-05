@@ -1,18 +1,25 @@
-local mapx = {
-  funcs = {},
-  ftmaps = {},
-}
+local mapx = {}
 local mapopts = {
-  buffer = { buffer = true },
+  buffer = { buffer = 0 },
   nowait = { nowait = true },
   silent = { silent = true },
   script = { script = true },
   expr   = { expr   = true },
   unique = { unique = true },
 }
-local setup = false
-local globalized = false
-local whichkey = nil
+local state = {
+  config = {
+    quiet = false,
+    global = false,
+    whichkey = false,
+  },
+  setup = false,
+  globalized = false,
+  whichkey = nil,
+  groupOpts = nil,
+  funcs = {},
+  ftmaps = {},
+}
 
 vim.cmd([[
   augroup mapx
@@ -22,7 +29,7 @@ vim.cmd([[
 ]])
 
 local function globalize(force, quiet)
-  if globalized then
+  if state.globalized then
     return _G
   end
   force = force or false
@@ -79,22 +86,22 @@ end
 
 -- Configure mapx
 function mapx.setup(config)
-  if setup then
+  if state.setup then
     return mapx
   end
-  config = config or {}
-  if config.whichkey then
+  state.config = merge(state.config, config or {})
+  if state.config.whichkey then
     local ok, wk = try_require('which-key')
     if not ok then
       error('mapx.setup: config.whichkey == true but module "which-key" not found')
     end
-    whichkey = wk
+    state.whichkey = wk
   end
-  if config.global then
-    globalize(config.global == "force", config.quiet or false)
-    globalized = true
+  if state.config.global then
+    globalize(state.config.global == "force", state.config.quiet or false)
+    state.globalized = true
   end
-  setup = true
+  state.setup = true
   return export()
 end
 
@@ -148,25 +155,35 @@ local function mapWhichKey(mode, lhs, rhs, opts, label)
   if mode ~= '' then
     wkopts = merge(opts, { mode = mode })
   end
-  whichkey.register({
+  state.whichkey.register({
     [lhs] = { rhs, label }
   }, wkopts)
 end
 
-local function ftmap(ft, fn)
-  if mapx.ftmaps[ft] == nil then
-    mapx.ftmaps[ft] = {}
+local function ftmap(fts, fn)
+  if type(fts) ~= "table" then
+    fts = { fts }
   end
-  table.insert(mapx.ftmaps[ft], fn)
+  for _, ft in ipairs(fts) do
+    if state.ftmaps[ft] == nil then
+      state.ftmaps[ft] = {}
+    end
+    table.insert(state.ftmaps[ft], fn)
+  end
 end
 
-function mapx._handleFileType(ft)
-  if mapx.ftmaps[ft] == nil then
-    return
+function mapx._handleFileType(ft, ...)
+  local ftmaps = state.ftmaps[ft]
+  if ftmaps == nil then return end
+  for _, fn in ipairs(ftmaps) do
+    fn(...)
   end
-  for _, fn in ipairs(mapx.ftmaps[ft]) do
-    fn()
-  end
+end
+
+function mapx._handleFunc(id, ...)
+  local fn = state.funcs[id]
+  if fn == nil then return end
+  fn(...)
 end
 
 function mapx._handleVimEnter()
@@ -175,7 +192,7 @@ function mapx._handleVimEnter()
       autocmd!
       autocmd FileType %s lua require'mapx'._handleFileType(vim.fn.expand('<amatch>'))
     augroup END
-  ]], table.concat(vim.tbl_keys(mapx.ftmaps), ",")))
+  ]], table.concat(vim.tbl_keys(state.ftmaps), ",")))
 end
 
 local function _map(mode, lhss, rhs, ...)
@@ -190,15 +207,15 @@ local function _map(mode, lhss, rhs, ...)
   end
   opts = expandStringOpts(opts)
   local label
-  if whichkey ~= nil then
+  if state.whichkey ~= nil then
     label, opts = extractLabel(opts)
   end
   if type(lhss) ~= 'table' then
     lhss = {lhss}
   end
   if type(rhs) == 'function' then
-    table.insert(mapx.funcs, rhs)
-    local luaexpr = "require'mapx'.funcs[" .. #mapx.funcs .. "](vim.v.count)"
+    table.insert(state.funcs, rhs)
+    local luaexpr = "require'mapx'._handleFunc(" .. #state.funcs .. ", vim.v.count)"
     if opts.expr then
       rhs = 'luaeval("' .. luaexpr .. '")'
     else
