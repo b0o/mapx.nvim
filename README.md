@@ -130,6 +130,14 @@ use "b0o/mapx.lua"
 ## Changelog
 
 ```
+04 Sep 2021                                                             v0.1.1
+   Added `mapx.group()`
+   Added debug logging with `mapx-config-debug`
+   Added support for `mapx-opt-filetype` maps
+   Added support for Lua functions as a map's `{rhs}`
+   Added `mapx-config-quiet`
+   Fixed bugs
+
 01 Sep 2021                                                             v0.1.0
    Added `mapx.setup()`
    Added `mapx-whichkey-support`
