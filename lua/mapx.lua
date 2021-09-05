@@ -18,6 +18,7 @@ local state = {
   globalized = false,
   whichkey = nil,
   groupOpts = nil,
+  -- TODO: Keep track of buffer-local funcs and clean them up when the buffer is closed
   funcs = {},
   ftmaps = {},
 }
@@ -278,6 +279,8 @@ local function _map(mode, lhss, rhs, ...)
     lhss = {lhss}
   end
   if type(rhs) == 'function' then
+    -- TODO: rhs gets inserted multiple times if a filetype mapping is
+    -- triggered multiple times
     table.insert(state.funcs, rhs)
     dbgi("state.funcs insert", {state=state})
     local luaexpr = "require'mapx'._handleFunc(" .. #state.funcs .. ", vim.v.count)"
