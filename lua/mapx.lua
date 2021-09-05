@@ -159,6 +159,7 @@ function mapx.setup(config)
     state.globalized = true
   end
   state.setup = true
+  dbgi("setup", {state=state})
   return export()
 end
 
@@ -218,6 +219,7 @@ local function mapWhichKey(mode, lhs, rhs, opts, label)
 end
 
 local function ftmap(fts, fn)
+  dbgi("ftmap", {fts=fts,fn=fn})
   if type(fts) ~= "table" then
     fts = { fts }
   end
@@ -227,9 +229,11 @@ local function ftmap(fts, fn)
     end
     table.insert(state.ftmaps[ft], fn)
   end
+  dbgi("state.ftmaps insert", {state=state})
 end
 
 function mapx._handleFileType(ft, ...)
+  dbgi("_handleFileType", {ft=ft,rest={...}})
   local ftmaps = state.ftmaps[ft]
   if ftmaps == nil then return end
   for _, fn in ipairs(ftmaps) do
@@ -275,6 +279,7 @@ local function _map(mode, lhss, rhs, ...)
   end
   if type(rhs) == 'function' then
     table.insert(state.funcs, rhs)
+    dbgi("state.funcs insert", {state=state})
     local luaexpr = "require'mapx'._handleFunc(" .. #state.funcs .. ", vim.v.count)"
     if opts.expr then
       rhs = 'luaeval("' .. luaexpr .. '")'
