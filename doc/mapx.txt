@@ -66,6 +66,9 @@ is:
   config.quiet     bool          false                       *mapx-config-quiet*
     Suppress warning messages.
 
+  config.debug     bool          false                       *mapx-config-debug*
+    Enable debug messages.
+
 ------------------------------------------------------------------------------
 2.2 Which-Key Support                                    *mapx-whichkey-support*
 

@@ -9,6 +9,7 @@ local mapopts = {
 }
 local state = {
   config = {
+    debug = false,
     quiet = false,
     global = false,
     whichkey = false,
@@ -27,6 +28,25 @@ vim.cmd([[
     autocmd VimEnter * lua require'mapx'._handleVimEnter()
   augroup END
 ]])
+
+local function dbg(...)
+  if not state.config.debug then return end
+  print(...)
+end
+
+local function dbgi(...)
+  if not state.config.debug then return end
+  local msg = {}
+  for i = 1, select('#', ...) do
+    local v = select(i, ...)
+    if type(v) == "table" or type(v) == "function" or type(v) == "thread" or type(v) == "userdata" then
+      table.insert(msg, vim.inspect(v))
+    else
+      table.insert(msg, v)
+    end
+  end
+  print(table.concat(msg, " "))
+end
 
 local function globalize(force, quiet)
   if state.globalized then
@@ -224,6 +244,7 @@ local function _map(mode, lhss, rhs, ...)
   end
   for _, lhs in ipairs(lhss) do
     if label ~= nil then
+      dbgi("_map whichkey", {mode=mode, lhs=lhs, rhs=rhs, opts=opts, label=label})
       mapWhichKey(mode, lhs, rhs, opts, label)
     elseif opts.buffer ~= nil then
       local b = 0
@@ -231,8 +252,10 @@ local function _map(mode, lhss, rhs, ...)
         b = opts.buffer
       end
       opts.buffer = nil
+      dbgi("_map buffer",{b=b, mode=mode, lhs=lhs, rhs=rhs, opts=opts})
       vim.api.nvim_buf_set_keymap(b, mode, lhs, rhs, opts)
     else
+      dbgi("_map",{mode=mode, lhs=lhs, rhs=rhs, opts=opts})
       vim.api.nvim_set_keymap(mode, lhs, rhs, opts)
     end
   end
