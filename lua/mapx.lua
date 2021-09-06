@@ -23,12 +23,14 @@ local state = {
   ftmaps = {},
 }
 
-vim.cmd([[
-  augroup mapx
-    autocmd!
-    autocmd VimEnter * lua require'mapx'._handleVimEnter()
-  augroup END
-]])
+local function init()
+  vim.cmd([[
+    augroup mapx_ftmap
+      autocmd!
+      autocmd FileType * lua require'mapx'._handleFileType(vim.fn.expand('<amatch>'))
+    augroup END
+  ]])
+end
 
 local function dbg(...)
   if not state.config.debug then return end
@@ -247,15 +249,6 @@ function mapx._handleFunc(id, ...)
   local fn = state.funcs[id]
   if fn == nil then return end
   return fn(...)
-end
-
-function mapx._handleVimEnter()
-  vim.cmd(string.format([[
-    augroup mapx_ftmap
-      autocmd!
-      autocmd FileType %s lua require'mapx'._handleFileType(vim.fn.expand('<amatch>'))
-    augroup END
-  ]], table.concat(vim.tbl_keys(state.ftmaps), ",")))
 end
 
 function mapx.group(...)
