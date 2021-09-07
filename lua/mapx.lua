@@ -475,4 +475,5 @@ function mapx.cnoremap(lhs, rhs, ...) return _map('c', lhs, rhs, { noremap = tru
 -- @param  label string       Optional label for which-key.nvim
 function mapx.tnoremap(lhs, rhs, ...) return _map('t', lhs, rhs, { noremap = true }, ...) end
 
+init()
 return export()
