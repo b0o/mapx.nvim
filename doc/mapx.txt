@@ -3,7 +3,7 @@
 Author:         Maddison Hellstrom <https://github.com/b0o/>
 Licence:        MIT
 Homepage:       https://github.com/b0o/mapx.lua
-Version:        0.1.1
+Version:        0.1.2
 
 ==============================================================================
 CONTENTS                                                         *mapx-contents*
@@ -367,6 +367,12 @@ With |mapx-config-whichkey| support enabled:
 <
 ==============================================================================
 5. Changelog                                                    *mapx-changelog*
+
+08 Sep 2021                                                             v0.1.2
+   Added support for |mapx-whichkey-names|
+   Allow wrapping string opts in <angle brackets>
+   Refactored code
+   Bug fixes
 
 04 Sep 2021                                                             v0.1.1
    Added |mapx.group()|

@@ -144,6 +144,12 @@ use "b0o/mapx.lua"
 ## Changelog
 
 ```
+08 Sep 2021                                                             v0.1.2
+   Added support for assigning WhichKey group names
+   Allow wrapping string opts in <angle brackets>
+   Refactored code
+   Bug fixes
+
 04 Sep 2021                                                             v0.1.1
    Added `mapx.group()`
    Added debug logging with `mapx-config-debug`
