@@ -16,8 +16,9 @@ CONTENTS                                                         *mapx-contents*
       3.1. Map Functions .................... |mapx-map-functions|
       3.2. Map Options ...................... |mapx-map-options|
       3.3. Map Groups ....................... |mapx-map-groups|
-      3.4. Buffer-local Maps ................ |mapx-buffer-maps|
-      3.5. Lua Function Maps ................ |mapx-lua-maps|
+      3.4. WhichKey Names ................... |mapx-whichkey-names|
+      3.5. Buffer-local Maps ................ |mapx-buffer-maps|
+      3.6. Lua Function Maps ................ |mapx-lua-maps|
     4. Examples ............................. |mapx-examples|
     5. Changelog ............................ |mapx-changelog|
     6. License .............................. |mapx-license|
@@ -105,7 +106,7 @@ will be merged.
                                                        *mapx-signature-whichkey*
 If |mapx-whichkey-support| is enabled, the final argument can be a string that
 labels the keybinding with which-key.nvim. The label can't be a string that
-conflicts with |mapx-option-strings|. If a label is present, the mapping is 
+conflicts with |mapx-option-strings|. If a label is present, the mapping is
 delegated to which-key rather than being set up directly with |nvim_set_keymap()|.
 
 ------------------------------------------------------------------------------
@@ -235,7 +236,7 @@ with the group opts, with the map's opts taking precedence over the group opts
 when conflicting.
 
 Groups can be nested; nested groups' opts are merged with their parent group's
-opts, with the nested group's opts taking precedence over the enclosing group's 
+opts, with the nested group's opts taking precedence over the enclosing group's
 opts when conflicting.
 
 Map groups are especially useful for |mapx-opt-filetype| maps.
@@ -254,7 +255,49 @@ For example, A and B are equivalent:
 <
 
 ------------------------------------------------------------------------------
-3.4 Buffer-local Maps                                         *mapx-buffer-maps*
+3.4 WhichKey Names                                         *mapx-whichkey-names*
+
+You may have multiple mappings that share a common beginning sequence of keys,
+for example `<leader>ga` and `<leader>gc`. In this case, when you press
+`<leader>` and wait for the WhichKey popup, it will show an entry like
+`g -> +prefix`; if you want a more descriptive name than `prefix`, you can
+assign a name to it with the mapx name functions. For example:
+>
+  mapx.name("<leader>g", "Git").
+<
+Now when WhichKey is triggered for `<leader>`, it will show `g -> +Git`
+
+Note that if a real mapping exists for `{lhs}`, this will have no noticeable
+effect.
+
+There is a name function corresponding to each mode:
+
+  mapx.name(...)                                                   *mapx.name()*
+  mapx.nname(...)                                                 *mapx.nname()*
+  mapx.vname(...)                                                 *mapx.vname()*
+  mapx.xname(...)                                                 *mapx.xname()*
+  mapx.sname(...)                                                 *mapx.sname()*
+  mapx.oname(...)                                                 *mapx.oname()*
+  mapx.iname(...)                                                 *mapx.iname()*
+  mapx.lname(...)                                                 *mapx.lname()*
+  mapx.cname(...)                                                 *mapx.cname()*
+  mapx.tname(...)                                                 *mapx.tname()*
+  mapx.namebang(...)                                           *mapx.namebang()*
+
+Each name function has the signature:
+>
+    {lhs}, {name}[, ...{opts}]
+<
+The `{opts}` argument accepts a subset of the |mapx-map-opts| options:
+
+  buffer    |mapx-opt-buffer|
+  filetype  |mapx-opt-filetype|
+
+Note that the name functions are not added to the global scope with
+|mapx-config-global|.
+
+------------------------------------------------------------------------------
+3.5 Buffer-local Maps                                         *mapx-buffer-maps*
 
 Unlike the builtin |nvim_set_keymap()| API, you are able to create
 buffer-local maps by passing `{ buffer = true }` as an option to the mapx map
@@ -268,7 +311,7 @@ To create the map on a specific buffer, set `buffer` to the buffer's |bufnr|:
   mapx.nnoremap("J", "5j", { buffer = 2 })
 <
 ------------------------------------------------------------------------------
-3.5 Lua Function Maps                                            *mapx-lua-maps*
+3.6 Lua Function Maps                                            *mapx-lua-maps*
 
 Mapx supports Lua functions as the `{rhs}` of a map. The function will be
 called with a single argument, the value of vim's |v:count| special variable.

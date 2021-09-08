@@ -217,4 +217,70 @@ function mapx.cnoremap(lhs, rhs, ...) return mapx.mapper:register('c', lhs, rhs,
 -- @param  label string       Optional label for which-key.nvim
 function mapx.tnoremap(lhs, rhs, ...) return mapx.mapper:register('t', lhs, rhs, { noremap = true }, ...) end
 
+-- Specify a which-key group name for {lhs} in Normal, Visual, Select, and Operator-pending mode
+-- @param  lhs   string|table Left-hand side(s) of map
+-- @param  name  string       Which-key name
+-- @vararg opts  string|table Map options such as { buffer } or { filetype }.
+function mapx.name(lhs, name, ...) return mapx.mapper:register({ mode = '', type = "name" }, lhs, nil, { name = name }, ...) end
+
+-- Specify a which-key group name for {lhs} in Normal mode
+-- @param  lhs   string|table Left-hand side(s) of map
+-- @param  name  string       Which-key name
+-- @vararg opts  string|table Map options such as { buffer } or { filetype }.
+function mapx.nname(lhs, name, ...) return mapx.mapper:register({ mode = 'n', type = "name" }, lhs, nil, { name = name }, ...) end
+
+-- Specify a which-key group name for {lhs} in Normal and Command mode
+-- @param  lhs   string|table Left-hand side(s) of map
+-- @param  name  string       Which-key name
+-- @vararg opts  string|table Map options such as { buffer } or { filetype }.
+function mapx.namebang(lhs, name, ...) return mapx.mapper:register({ mode = '!', type = "name" }, lhs, nil, { name = name }, ...) end
+
+-- Specify a which-key group name for {lhs} in Visual and Select mode
+-- @param  lhs   string|table Left-hand side(s) of map
+-- @param  name  string       Which-key name
+-- @vararg opts  string|table Map options such as { buffer } or { filetype }.
+function mapx.vname(lhs, name, ...) return mapx.mapper:register({ mode = 'v', type = "name" }, lhs, nil, { name = name }, ...) end
+
+-- Specify a which-key group name for {lhs} in Visual mode
+-- @param  lhs   string|table Left-hand side(s) of map
+-- @param  name  string       Which-key name
+-- @vararg opts  string|table Map options such as { buffer } or { filetype }.
+function mapx.xname(lhs, name, ...) return mapx.mapper:register({ mode = 'x', type = "name" }, lhs, nil, { name = name }, ...) end
+
+-- Specify a which-key group name for {lhs} in Select mode
+-- @param  lhs   string|table Left-hand side(s) of map
+-- @param  name  string       Which-key name
+-- @vararg opts  string|table Map options such as { buffer } or { filetype }.
+function mapx.sname(lhs, name, ...) return mapx.mapper:register({ mode = 's', type = "name" }, lhs, nil, { name = name }, ...) end
+
+-- Specify a which-key group name for {lhs} inn Operator-pending mode
+-- @param  lhs   string|table Left-hand side(s) of map
+-- @param  name  string       Which-key name
+-- @vararg opts  string|table Map options such as { buffer } or { filetype }.
+function mapx.oname(lhs, name, ...) return mapx.mapper:register({ mode = 'o', type = "name" }, lhs, nil, { name = name }, ...) end
+
+-- Specify a which-key group name for {lhs} inn Insert mode
+-- @param  lhs   string|table Left-hand side(s) of map
+-- @param  name  string       Which-key name
+-- @vararg opts  string|table Map options such as { buffer } or { filetype }.
+function mapx.iname(lhs, name, ...) return mapx.mapper:register({ mode = 'i', type = "name" }, lhs, nil, { name = name }, ...) end
+
+-- Specify a which-key group name for {lhs} inn Insert, Command, and Lang-arg mode
+-- @param  lhs   string|table Left-hand side(s) of map
+-- @param  name  string       Which-key name
+-- @vararg opts  string|table Map options such as { buffer } or { filetype }.
+function mapx.lname(lhs, name, ...) return mapx.mapper:register({ mode = 'l', type = "name" }, lhs, nil, { name = name }, ...) end
+
+-- Specify a which-key group name for {lhs} in Command mode
+-- @param  lhs   string|table Left-hand side(s) of map
+-- @param  name  string       Which-key name
+-- @vararg opts  string|table Map options such as { buffer } or { filetype }.
+function mapx.cname(lhs, name, ...) return mapx.mapper:register({ mode = 'c', type = "name" }, lhs, nil, { name = name }, ...) end
+
+-- Specify a which-key group name for {lhs} in Terminal mode
+-- @param  lhs   string|table Left-hand side(s) of map
+-- @param  name  string       Which-key name
+-- @vararg opts  string|table Map options such as { buffer } or { filetype }.
+function mapx.tname(lhs, name, ...) return mapx.mapper:register({ mode = 't', type = "name" }, lhs, nil, { name = name }, ...) end
+
 return mapx

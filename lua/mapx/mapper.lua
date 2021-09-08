@@ -130,6 +130,23 @@ function Mapper:registerMap(mode, lhs, rhs, opts, wkopts, label)
   end
 end
 
+function Mapper:registerName(mode, lhs, opts)
+  if opts.name == nil then error("mapx.name: missing name") end
+  if self.whichkey then
+    local reg = {
+      [lhs] = {
+        name = opts.name
+      }
+    }
+    local regopts = merge({
+      buffer = opts.buffer or nil,
+      mode = mode ~= '' and mode or nil,
+    })
+    dbgi("Mapper:registerName", {mode=mode, reg=reg, regopts=regopts})
+    self.whichkey.register(reg, regopts)
+  end
+end
+
 function Mapper:register(config, lhss, rhs, ...)
   if type(config) ~= "table" then
     config = { mode = config, type = "map" }
@@ -170,6 +187,8 @@ function Mapper:register(config, lhss, rhs, ...)
   for _, lhs in ipairs(lhss) do
     if config.type == 'map' then
       self:registerMap(config.mode, lhs, rhs, opts, wkopts, label)
+    elseif config.type == 'name' then
+      self:registerName(config.mode, lhs, opts)
     end
   end
 end
