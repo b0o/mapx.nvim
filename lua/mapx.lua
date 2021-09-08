@@ -1,94 +1,11 @@
-local mapx = {}
-local mapopts = {
-  buffer = { buffer = 0 },
-  nowait = { nowait = true },
-  silent = { silent = true },
-  script = { script = true },
-  expr   = { expr   = true },
-  unique = { unique = true },
-}
-local state = {
-  config = {
-    debug = false,
-    quiet = false,
-    global = false,
-    whichkey = false,
-  },
-  setup = false,
-  globalized = false,
-  whichkey = nil,
-  groupOpts = nil,
-  -- TODO: Keep track of buffer-local funcs and clean them up when the buffer is closed
-  funcs = {},
-  ftmaps = {},
-}
+local Mapper = require'mapx.mapper'
+local log = require'mapx.log'
+local merge = require'mapx.util'.merge
+local deprecated = require'mapx.deprecated'
 
-local function init()
-  vim.cmd([[
-    augroup mapx_ftmap
-      autocmd!
-      autocmd FileType * lua require'mapx'._handleFileType(vim.fn.expand('<amatch>'))
-    augroup END
-  ]])
-end
+local dbgi = log.dbgi
 
-local function dbg(...)
-  if not state.config.debug then return end
-  local function getpwin()
-    for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-     if vim.fn.win_gettype(w) == "preview" then
-       return w
-     end
-   end
-  end
-  local pwin = getpwin()
-  if pwin == nil then
-    vim.cmd(string.format("pedit +%s mapx_debug", table.concat({
-      'setlocal',
-      'nomodifiable',
-      'buftype=nofile',
-      'bufhidden=hide',
-      'nobuflisted',
-      'noswapfile',
-      'nonumber',
-      'norelativenumber',
-      'nomodeline',
-      'nolist',
-      'scrolloff=0',
-    }, "\\ ")))
-    pwin = getpwin()
-  end
-  if pwin == nil then
-    print(...)
-    return
-  end
-  local msg = string.format("[%s] %s\n", os.date "%H:%M:%S", table.concat({...}, " "))
-  local pbuf = vim.api.nvim_win_get_buf(pwin)
-  vim.api.nvim_buf_set_option(pbuf, "modifiable", true)
-  vim.api.nvim_buf_set_lines(pbuf, -1, -1, false, vim.split(msg, "\n", true))
-  vim.api.nvim_buf_set_option(pbuf, "modifiable", false)
-  vim.api.nvim_win_set_cursor(pwin, {vim.api.nvim_buf_line_count(pbuf), 0})
-end
-
-local function dbgi(...)
-  if not state.config.debug then return end
-  local msg = {}
-  for i = 1, select('#', ...) do
-    local v = select(i, ...)
-    if type(v) == "table" or type(v) == "function" or type(v) == "thread" or type(v) == "userdata" then
-      table.insert(msg, vim.inspect(v))
-    else
-      table.insert(msg, v)
-    end
-  end
-  dbg(table.concat(msg, " "))
-end
-
-local function globalize(force, quiet)
-  if state.globalized then
-    return _G
-  end
-  force = force or false
+local function globalize(mapx, opt)
   local mapFuncs = {}
   for _, mode in ipairs {'', 'n', 'v', 'x', 's', 'o', 'i', 'l', 'c', 't'} do
     local m = mode .. 'map'
@@ -100,380 +17,204 @@ local function globalize(force, quiet)
   mapFuncs.noremapbang = mapx.noremapbang
   for k, v in pairs(mapFuncs) do
     if _G[k] ~= nil then
-      local msg = 'overwriting key "' .. k .. '" in global scope'
-      if force then
-        if not quiet then
-          print('mapx.global: warning: ' .. msg .. ' {force = true}')
+      if opt ~= "force" then
+        if opt == "skip" then
+          goto continue
         end
-      else
-        error('mapx.global: not' .. msg)
+        log.warn('mapx.global: name conflict: "' .. k .. '" exists in global scope. Use { global = "force" } or { global = "skip" }.')
+        break
       end
     end
     _G[k] = v
+    ::continue::
   end
   return _G
 end
 
-local function try_require(pkg)
-  return pcall(function()
-    return require(pkg)
-  end)
-end
+local mapx = merge({
+  config = {
+    debug = false,
+    global = false,
+    whichkey = false,
+  },
+  globalized = false,
+  mapper = Mapper.new(),
+}, Mapper.mapopts)
 
--- merge 2 or more tables non-recursively
-local function merge(...)
-  local res = {}
-  for i = 1, select('#', ...) do
-    local arg = select(i, ...)
-    if type(arg) == 'table' then
-      for k, v in pairs(arg) do
-        if type(k) == "number" then
-          table.insert(res, v)
-        else
-          res[k] = v
-        end
-      end
-    else
-      table.insert(res, arg)
-    end
-  end
-  return res
-end
-
-local function export()
-  return merge(mapx, mapopts)
-end
+deprecated.apply(mapx)
 
 -- Configure mapx
 function mapx.setup(config)
-  if state.setup then
-    return mapx
+  mapx.config = merge(mapx.config, config or {})
+  log.debug = mapx.config.debug or false
+  mapx.mapper:setup{ whichkey = mapx.config.whichkey }
+  if mapx.config.global then
+    globalize(mapx, type(mapx.config.global) == "string" and mapx.config.global)
+    mapx.globalized = true
   end
-  state.config = merge(state.config, config or {})
-  if state.config.whichkey then
-    local ok, wk = try_require('which-key')
-    if not ok then
-      error('mapx.setup: config.whichkey == true but module "which-key" not found')
-    end
-    state.whichkey = wk
-  end
-  if state.config.global then
-    globalize(state.config.global == "force", state.config.quiet or false)
-    state.globalized = true
-  end
-  state.setup = true
-  dbgi("setup", {state=state})
-  return export()
+  deprecated.checkConfig(mapx.config)
+  mapx.setup = true
+  dbgi("setup", mapx)
+  return mapx
 end
 
--- Deprecated!
-function mapx.globalize()
-  error("mapx.globalize() has been deprecated; use mapx.setup({ global = true })")
-end
-
--- Extract a WhichKey label which is either:
--- - a key 'label'
--- - a string which can occur at the end of the integer-keyed opts
--- Returns the label and a new opts table with the label removed.
--- If WhichKey isn't enabled, returns nil and the original opts table.
-local function extractLabel(opts)
-  local _opts = merge({}, opts)
-  local label
-  if _opts.label ~= nil then
-    label = _opts.label
-    _opts.label = nil
-    return label, _opts
-  end
-  if _opts[#_opts] ~= nil and mapopts[_opts[#_opts]] == nil then
-    label = _opts[#_opts]
-    table.remove(_opts, #_opts)
-    return label, _opts
-  end
-  return nil, _opts
-end
-
--- Expands string-based options like "buffer", "silent", "expr" to their
--- table-based representation. Also supports <wrapped> strings "<buffer>"
--- Returns a new opts table with this expansion applied.
-local function expandStringOpts(opts)
-  local res = {}
-  for k, v in pairs(opts) do
-    if type(k) == "number" then
-      local vsub = type(v) == "string" and vim.fn.substitute(v, [[^<\|>$]], "", "g")
-      if vsub and mapopts[vsub] ~= nil then
-        res[vsub] = true
-      else
-        table.insert(res, v)
-      end
-    else
-      res[k] = v
-    end
-  end
-  return res
-end
-
-local function mapWhichKey(mode, lhs, rhs, opts, label)
-  local wkopts = opts
-  if mode ~= '' then
-    wkopts = merge(opts, { mode = mode })
-  end
-  state.whichkey.register({
-    [lhs] = { rhs, label }
-  }, wkopts)
-end
-
-local function ftmap(fts, fn)
-  dbgi("ftmap", {fts=fts,fn=fn})
-  if type(fts) ~= "table" then
-    fts = { fts }
-  end
-  for _, ft in ipairs(fts) do
-    if state.ftmaps[ft] == nil then
-      state.ftmaps[ft] = {}
-    end
-    table.insert(state.ftmaps[ft], fn)
-  end
-  dbgi("state.ftmaps insert", {state=state})
-end
-
-function mapx._handleFileType(ft, ...)
-  dbgi("_handleFileType", {ft=ft,rest={...}})
-  local ftmaps = state.ftmaps[ft]
-  if ftmaps == nil then return end
-  for _, fn in ipairs(ftmaps) do
-    fn(...)
-  end
-end
-
-function mapx._handleFunc(id, ...)
-  local fn = state.funcs[id]
-  if fn == nil then return end
-  return fn(...)
-end
-
-function mapx.group(...)
-  local prevOpts = state.groupOpts
-  local fn
-  local args = {...}
-  for i, v in ipairs(args) do
-    if i < #args then
-      state.groupOpts = merge(state.groupOpts, v)
-    else
-      fn = v
-    end
-  end
-  dbgi("group", state.groupOpts)
-  local label = extractLabel(state.groupOpts)
-  if label ~= nil then
-    error("mapx.group: cannot set label on group: " .. tostring(label))
-  end
-  fn()
-  state.groupOpts = prevOpts
-end
-
-local function _map(mode, lhss, rhs, ...)
-  local opts = merge({}, state.groupOpts, ...)
-  local ft = opts.filetype or opts.ft
-  if ft ~= nil then
-    opts.ft = nil
-    opts.filetype = nil
-    opts.buffer = opts.buffer or 0
-    ftmap(ft, function() _map(mode, lhss, rhs, opts) end)
-    return
-  end
-  opts = expandStringOpts(opts)
-  local label
-  local wkopts
-  if opts.buffer == true then
-    opts.buffer = 0
-  end
-  if state.whichkey ~= nil then
-    label, wkopts = extractLabel(opts)
-  end
-  if type(lhss) ~= 'table' then
-    lhss = {lhss}
-  end
-  if type(rhs) == 'function' then
-    -- TODO: rhs gets inserted multiple times if a filetype mapping is
-    -- triggered multiple times
-    table.insert(state.funcs, rhs)
-    dbgi("state.funcs insert", {state=state})
-    local luaexpr = "require'mapx'._handleFunc(" .. #state.funcs .. ", vim.v.count)"
-    if opts.expr then
-      rhs = 'luaeval("' .. luaexpr .. '")'
-    else
-      rhs = "<Cmd>lua " .. luaexpr .. "<Cr>"
-    end
-  end
-  for _, lhs in ipairs(lhss) do
-    if label then
-      dbgi("_map whichkey", {mode=mode, lhs=lhs, rhs=rhs, wkopts=wkopts, label=label})
-      mapWhichKey(mode, lhs, rhs, wkopts, label)
-    elseif opts.buffer then
-      local bopts = merge({}, opts)
-      bopts.buffer = nil
-      dbgi("_map buffer",{mode=mode, lhs=lhs, rhs=rhs, opts=opts, bopts=bopts})
-      vim.api.nvim_buf_set_keymap(opts.buffer, mode, lhs, rhs, bopts)
-    else
-      dbgi("_map",{mode=mode, lhs=lhs, rhs=rhs, opts=opts})
-      vim.api.nvim_set_keymap(mode, lhs, rhs, opts)
-    end
-  end
-end
+-- Create a mapx group
+-- @vararg opts  string|table Map options
+-- @param  fn    function     Function with map definitions
+function mapx.group(...) return mapx.mapper:group(...) end
 
 -- Create a Normal, Visual, Select, and Operator-pending mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.map(lhs, rhs, ...) return _map('', lhs, rhs, ...) end
+function mapx.map(lhs, rhs, ...) return mapx.mapper:register('', lhs, rhs, ...) end
 
 -- Create a Normal mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.nmap(lhs, rhs, ...) return _map('n', lhs, rhs, ...) end
+function mapx.nmap(lhs, rhs, ...) return mapx.mapper:register('n', lhs, rhs, ...) end
 
 -- Create a Normal and Command mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.mapbang(lhs, rhs, ...) return _map('!', lhs, rhs, ...) end
+function mapx.mapbang(lhs, rhs, ...) return mapx.mapper:register('!', lhs, rhs, ...) end
 
 -- Create a Visual and Select mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.vmap(lhs, rhs, ...) return _map('v', lhs, rhs, ...) end
+function mapx.vmap(lhs, rhs, ...) return mapx.mapper:register('v', lhs, rhs, ...) end
 
 -- Create a Visual mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.xmap(lhs, rhs, ...) return _map('x', lhs, rhs, ...) end
+function mapx.xmap(lhs, rhs, ...) return mapx.mapper:register('x', lhs, rhs, ...) end
 
 -- Create a Select mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.smap(lhs, rhs, ...) return _map('s', lhs, rhs, ...) end
+function mapx.smap(lhs, rhs, ...) return mapx.mapper:register('s', lhs, rhs, ...) end
 
 -- Create an Operator-pending mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.omap(lhs, rhs, ...) return _map('o', lhs, rhs, ...) end
+function mapx.omap(lhs, rhs, ...) return mapx.mapper:register('o', lhs, rhs, ...) end
 
 -- Create an Insert mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.imap(lhs, rhs, ...) return _map('i', lhs, rhs, ...) end
+function mapx.imap(lhs, rhs, ...) return mapx.mapper:register('i', lhs, rhs, ...) end
 
 -- Create an Insert, Command, and Lang-arg mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.lmap(lhs, rhs, ...) return _map('l', lhs, rhs, ...) end
+function mapx.lmap(lhs, rhs, ...) return mapx.mapper:register('l', lhs, rhs, ...) end
 
 -- Create a Command mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.cmap(lhs, rhs, ...) return _map('c', lhs, rhs, ...) end
+function mapx.cmap(lhs, rhs, ...) return mapx.mapper:register('c', lhs, rhs, ...) end
 
 -- Create a Terminal mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.tmap(lhs, rhs, ...) return _map('t', lhs, rhs, ...) end
+function mapx.tmap(lhs, rhs, ...) return mapx.mapper:register('t', lhs, rhs, ...) end
 
 -- Create a non-recursive Normal, Visual, Select, and Operator-pending mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.noremap(lhs, rhs, ...) return _map('', lhs, rhs, { noremap = true }, ...) end
+function mapx.noremap(lhs, rhs, ...) return mapx.mapper:register('', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Normal mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.nnoremap(lhs, rhs, ...) return _map('n', lhs, rhs, { noremap = true }, ...) end
+function mapx.nnoremap(lhs, rhs, ...) return mapx.mapper:register('n', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Normal and Command mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.noremapbang(lhs, rhs, ...) return _map('!', lhs, rhs, { noremap = true }, ...) end
+function mapx.noremapbang(lhs, rhs, ...) return mapx.mapper:register('!', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Visual and Select mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.vnoremap(lhs, rhs, ...) return _map('v', lhs, rhs, { noremap = true }, ...) end
+function mapx.vnoremap(lhs, rhs, ...) return mapx.mapper:register('v', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Visual mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.xnoremap(lhs, rhs, ...) return _map('x', lhs, rhs, { noremap = true }, ...) end
+function mapx.xnoremap(lhs, rhs, ...) return mapx.mapper:register('x', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Select mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.snoremap(lhs, rhs, ...) return _map('s', lhs, rhs, { noremap = true }, ...) end
+function mapx.snoremap(lhs, rhs, ...) return mapx.mapper:register('s', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Operator-pending mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.onoremap(lhs, rhs, ...) return _map('o', lhs, rhs, { noremap = true }, ...) end
+function mapx.onoremap(lhs, rhs, ...) return mapx.mapper:register('o', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Insert mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.inoremap(lhs, rhs, ...) return _map('i', lhs, rhs, { noremap = true }, ...) end
+function mapx.inoremap(lhs, rhs, ...) return mapx.mapper:register('i', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Insert, Command, and Lang-arg mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.lnoremap(lhs, rhs, ...) return _map('l', lhs, rhs, { noremap = true }, ...) end
+function mapx.lnoremap(lhs, rhs, ...) return mapx.mapper:register('l', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Command mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.cnoremap(lhs, rhs, ...) return _map('c', lhs, rhs, { noremap = true }, ...) end
+function mapx.cnoremap(lhs, rhs, ...) return mapx.mapper:register('c', lhs, rhs, { noremap = true }, ...) end
 
 -- Create a non-recursive Terminal mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
-function mapx.tnoremap(lhs, rhs, ...) return _map('t', lhs, rhs, { noremap = true }, ...) end
+function mapx.tnoremap(lhs, rhs, ...) return mapx.mapper:register('t', lhs, rhs, { noremap = true }, ...) end
 
-init()
-return export()
+return mapx
