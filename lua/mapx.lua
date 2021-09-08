@@ -28,7 +28,6 @@ local function globalize(mapx, opt)
     _G[k] = v
     ::continue::
   end
-  return _G
 end
 
 local mapx = merge({
