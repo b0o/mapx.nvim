@@ -56,10 +56,10 @@ nnoremap("gD", "<cmd>lua vim.lsp.buf.declaration()<Cr>", "silent", "LSP: Goto de
 
 -- Also supports setting WhichKey group names
 m.nname("<leader>l", "LSP")
-nnoremap ("<leader>li", ":LspInfo<Cr>",    "LSP: Show LSP information")
-nnoremap ("<leader>lr", ":LspRestart<Cr>", "LSP: Restart LSP")
-nnoremap ("<leader>ls", ":LspStart<Cr>",   "LSP: Start LSP")
-nnoremap ("<leader>lS", ":LspStop<Cr>",    "LSP: Stop LSP")
+nnoremap("<leader>li", ":LspInfo<Cr>",    "LSP: Show LSP information")
+nnoremap("<leader>lr", ":LspRestart<Cr>", "LSP: Restart LSP")
+nnoremap("<leader>ls", ":LspStart<Cr>",   "LSP: Start LSP")
+nnoremap("<leader>lS", ":LspStop<Cr>",    "LSP: Stop LSP")
 ```
 
 Create FileType maps:
