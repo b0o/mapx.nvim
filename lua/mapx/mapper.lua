@@ -21,15 +21,20 @@ local function expandStringOpts(opts)
   local res = {}
   for k, v in pairs(opts) do
     if type(k) == "number" then
+      if Mapper.mapopts[v] then
+        res[v] = true
+        goto continue
+      end
       local vsub = type(v) == "string" and vim.fn.substitute(v, [[^<\|>$]], "", "g")
       if vsub and Mapper.mapopts[vsub] ~= nil then
         res[vsub] = true
-      else
-        table.insert(res, v)
+        goto continue
       end
+      table.insert(res, v)
     else
       res[k] = v
     end
+    ::continue::
   end
   return res
 end
@@ -204,6 +209,7 @@ function Mapper:group(...)
       fn = v
     end
   end
+  self.groupOpts = expandStringOpts(self.groupOpts)
   dbgi("group", self.groupOpts)
   local label = extractLabel(self.groupOpts)
   if label ~= nil then
