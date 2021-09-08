@@ -3,7 +3,7 @@
 Author:         Maddison Hellstrom <https://github.com/b0o/>
 Licence:        MIT
 Homepage:       https://github.com/b0o/mapx.lua
-Version:        0.1.2
+Version:        0.2.0
 
 ==============================================================================
 CONTENTS                                                         *mapx-contents*
@@ -53,20 +53,20 @@ is:
 <
   Key              Type          Default
   global           bool|string   false                      *mapx-config-global*
-    If truthy, the mapx map functions will be attached to the global scope so
-    that they can be called directly. If there is a global name collision,
-    `setup()` will error out unless the value is `"force"`.
+    If `true`, the mapx map functions will be attached to the global scope so
+    that they can be called directly.
+
+    If there is a global name collision, globalization will be aborted unless
+    the value of `global` is `"force"`, in which case the global value will be
+    overridden, or `"skip"`, in which case the conflicting functions will be
+    skipped silently.
 
     Note that `global = true` does not bind the |mapx-map-options| variables
-    to the global scope, so you will still need to access them via the mapx
-    module or use |mapx-option-strings|.
+    or the |mapx-whichkey-names| functions to the global scope.
 
   whichkey         bool          false                    *mapx-config-whichkey*
     If `true`, support for labeling keybindings with `which-key.nvim` is enabled.
     See |mapx-whichkey-support|.
-
-  quiet            bool          false                       *mapx-config-quiet*
-    Suppress warning messages.
 
   debug            bool          false                       *mapx-config-debug*
     Display debug messages in the preview window.
@@ -367,6 +367,10 @@ With |mapx-config-whichkey| support enabled:
 <
 ==============================================================================
 5. Changelog                                                    *mapx-changelog*
+
+08 Sep 2021                                                             v0.2.0
+   Breaking: Deprecated config.quiet in favor of `setup({global = "force"})`
+             or `setup({global = "skip"})`
 
 08 Sep 2021                                                             v0.1.2
    Added support for |mapx-whichkey-names|

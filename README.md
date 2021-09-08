@@ -144,6 +144,10 @@ use "b0o/mapx.lua"
 ## Changelog
 
 ```
+08 Sep 2021                                                             v0.2.0
+   Breaking: Deprecated config.quiet in favor of `setup({global = "force"})`
+             or `setup({global = "skip"})`
+
 08 Sep 2021                                                             v0.1.2
    Added support for assigning WhichKey group names
    Allow wrapping string opts in <angle brackets>
