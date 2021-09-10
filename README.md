@@ -1,4 +1,4 @@
-# mapx.lua [![version](https://img.shields.io/github/v/tag/b0o/mapx.lua?style=flat&color=yellow&label=version&sort=semver)](https://github.com/b0o/mapx.lua/releases) [![license: MIT](https://img.shields.io/github/license/b0o/mapx.lua?style=flat&color=green)](https://mit-license.org)
+# mapx.lua [![version](https://img.shields.io/github/v/tag/b0o/mapx.lua?style=flat&color=yellow&label=version&sort=semver)](https://github.com/b0o/mapx.lua/releases) [![license: MIT](https://img.shields.io/github/license/b0o/mapx.lua?style=flat&color=green)](https://mit-license.org) [![Build Status](https://img.shields.io/github/workflow/status/b0o/mapx.lua/test)](https://github.com/b0o/mapx.lua/actions/workflows/test.yaml)
 
 A Neovim lua plugin to make mapping more manageable.
 
@@ -162,19 +162,9 @@ mapx.nmap('<leader>xw', '<cmd>Trouble lsp_workspace_diagnostics<cr>', 'silent')
 mapx.noremap('gR', '<cmd>Trouble lsp_references<cr>', 'buffer')
 ```
 
-If you installed mapx via Packer, the convert script is likely located at
-`$HOME/.local/share/nvim/site/pack/packer/start/mapx.lua/scripts/convert`.
-
 You can provide a configuration table via the `-c` flag. For example:
 
 ```sh
-$ cat /tmp/maps.lua
-vim.api.nvim_set_keymap("!", "<C-z>", "<Nop>")
-vim.api.nvim_set_keymap("v", ">", ">gv", {noremap = true, silent = true})
-vim.api.nvim_set_keymap("n", "<leader>xx", "<cmd>Trouble<cr>", {silent = true, noremap = true})
-vim.api.nvim_set_keymap("n", "<leader>xw", "<cmd>Trouble lsp_workspace_diagnostics<cr>", {silent = true })
-vim.api.nvim_buf_set_keymap(0, "", "gR", "<cmd>Trouble lsp_references<cr>", { noremap = true})
-
 $ /path/to/mapx.lua/scripts/convert -c '{ config = { global = true }, optStyle = "string" }'` /tmp/maps.lua
 local mapx = require'mapx'.setup{
   global = true
@@ -186,12 +176,13 @@ nmap('<leader>xw', '<cmd>Trouble lsp_workspace_diagnostics<cr>', 'silent')
 noremap('gR', '<cmd>Trouble lsp_references<cr>', 'buffer')
 ```
 
+If you installed mapx via Packer, the convert script is likely located at
+`$HOME/.local/share/nvim/site/pack/packer/start/mapx.lua/scripts/convert`.
+
 Note that the output will not include any comments, formatting, or any code other
 than calls to `vim.api.nvim_set_keymap()`/`vim.api.nvim_buf_set_keymap()`.
 
 See `:help mapx-convert` for more information.
-
-## Autoconvert your VimL mappings to mapx
 
 A VimL converter is planned but not yet implemented. PRs welcome :)
 
