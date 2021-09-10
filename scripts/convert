@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+declare -g base prog basedir rootdir
+base="$(realpath -e "${BASH_SOURCE[0]}")"
+prog="$(basename "$base")"
+basedir="$(dirname "$base")"
+rootdir="$(dirname "$basedir")"
+
+function usage() {
+  cat << EOF
+Usage: $prog [opt...] INFILE
+
+Convert mappings that use Neovim's vim.api.nvim_set_keymap() functions to use mapx.
+
+The mapx Neovim plugin must be installed and available in your runtimepath.
+
+INFILE is a Lua file containing the mappings you wish to convert. For best
+results, it shouldn't include anything other than calls to
+vim.api.nvim_set_keymap() and vim.api.nvim_buf_set_keymap().
+
+Converted mappings will be written to stdout.
+
+Options:
+  -h         Display usage information
+  -c CONFIG  Lua table to configure mapx.convert. See :help mapx-convert-config
+EOF
+}
+
+function main() {
+  local opt OPTARG
+  local -i OPTIND
+  local config="{}"
+  while getopts "hc:" opt "$@"; do
+    case "$opt" in
+    h)
+      usage
+      return 0
+      ;;
+    c)
+      config="$OPTARG"
+      ;;
+    \?)
+      return 1
+      ;;
+    esac
+  done
+  shift $((OPTIND - 1))
+  local infile="${1:-}"
+  if [[ -z "$infile" ]]; then
+    usage
+    return 1
+  fi
+  if [[ ! -f "$infile" ]]; then
+    echo "error: file not found: $infile" >&2
+    return 1
+  fi
+  nvim --headless --noplugin \
+    -u "$rootdir/scripts/minimal.vim" \
+    --cmd "
+        lua require'mapx.convert.lua'.setup(vim.tbl_extend('force', {
+          out = 'print',
+          passthrough = false,
+        }, $config))
+      " \
+    -c "luafile $infile" \
+    -c ':q' 2>&1 | tr -d '\r'
+}
+
+main "$@"
