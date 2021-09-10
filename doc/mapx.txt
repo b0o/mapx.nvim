@@ -20,8 +20,9 @@ CONTENTS                                                         *mapx-contents*
       3.5. Buffer-local Maps ................ |mapx-buffer-maps|
       3.6. Lua Function Maps ................ |mapx-lua-maps|
     4. Examples ............................. |mapx-examples|
-    5. Changelog ............................ |mapx-changelog|
-    6. License .............................. |mapx-license|
+    5. Auto-Conversion ...................... |mapx-convert|
+    6. Changelog ............................ |mapx-changelog|
+    7. License .............................. |mapx-license|
 
 ==============================================================================
 1. Intro                                                            *mapx-intro*
@@ -52,7 +53,7 @@ is:
   }
 <
   Key              Type          Default
-  global           bool|string   false                      *mapx-config-global*
+  global          boolean|string false                      *mapx-config-global*
     If `true`, the mapx map functions will be attached to the global scope so
     that they can be called directly.
 
@@ -64,11 +65,11 @@ is:
     Note that `global = true` does not bind the |mapx-map-options| variables
     or the |mapx-whichkey-names| functions to the global scope.
 
-  whichkey         bool          false                    *mapx-config-whichkey*
+  whichkey         boolean       false                    *mapx-config-whichkey*
     If `true`, support for labeling keybindings with `which-key.nvim` is enabled.
     See |mapx-whichkey-support|.
 
-  debug            bool          false                       *mapx-config-debug*
+  debug            boolean       false                       *mapx-config-debug*
     Display debug messages in the preview window.
 
 ------------------------------------------------------------------------------
@@ -152,7 +153,7 @@ The mapx map functions accept all of the same options as |nvim_set_keymap()|
 as well as mapx-specific options. Mapx-specific options include:
 
   Option           Type          Default
-  buffer           bool|number   nil                           *mapx-opt-buffer*
+  buffer          boolean|number nil                           *mapx-opt-buffer*
     If true or the number 0, the map is local to the current buffer.
     If >0, the map is local to the buffer with that number.
 
@@ -221,15 +222,15 @@ See |:map-arguments| and |nvim_set_keymap()| for more information on map options
 
 Mappings with shared |mapx-map-options| can be grouped with the `group`
 function:
-
-  mapx.group(...{opts}, {group-fn})                               *mapx.group()*
 >
+  mapx.group(...{opts}, {group-fn})                               *mapx.group()*
+<
 The `...{opts}` argument(s) are exactly as described in |mapx-signature-opts|,
 except that |whichkey-opt-label| opts are not allowed.
 
 The `{group-fn}` argument is a Lua function that will be called immediately to
 set up any mapx maps defined within it.
->
+
 Within a group, all options set on the group will be set on maps created
 within the group. Options set on individual maps within a group are merged
 with the group opts, with the map's opts taking precedence over the group opts
@@ -366,7 +367,100 @@ With |mapx-config-whichkey| support enabled:
   m.nnoremap([[<leader>yy]], [["+yy]], "Yank line to system clipboard")
 <
 ==============================================================================
-5. Changelog                                                    *mapx-changelog*
+5. Auto-Conversion                                              *mapx-changelog*
+
+Mapx provides a facility to convert mappings that use Neovim's
+`vim.api.nvim_set_keymap()`/`vim.api.nvim_buf_set_keymap()` functions to mapx
+functions.
+
+To use the converter, copy your mappings (ideally without any other config)
+into a new Lua file and run the converter script located at `/scripts/convert`
+within the mapx project directory.
+
+For example, if the file containing your mappings is at `/tmp/maps.lua`:
+The conversion result will be written to stdout:
+
+>
+  /path/to/mapx.lua/scripts/convert /tmp/maps.lua
+<
+
+If you installed mapx via Packer, the convert script is likely located at
+`$HOME/.local/share/nvim/site/pack/packer/start/mapx.lua/scripts/convert`.
+
+You can provide a configuration table via the `-c` flag. For example:
+
+>
+/path/to/mapx.lua/scripts/convert -c '{ global = true, optStyle = "string" }'` /tmp/maps.lua
+<
+
+Note that the output will not include any comments, formatting, or any code other
+than calls to `vim.api.nvim_set_keymap()`/`vim.api.nvim_buf_set_keymap()`.
+
+------------------------------------------------------------------------------
+5.1 Configuration                                          *mapx-convert-config*
+
+  convert.setup({config})                                      *convert.setup()*
+    `setup()` takes a `config` argument (see |mapx-convert-config-opts|) and
+    returns the mapx module. Subsequent calls to `setup()` have no effect but
+    still return the mapx module.
+
+Mapx's convert convert config can contain the following keys:
+
+  Key              Type          Default
+  config           table         {}                 *mapx-convert-config-global*
+    A config table which will be passed to |mapx.setup()|.
+    The converter respects the `config.global` option and will output global
+    maps if it's `true`.
+    See |mapx-config|.
+
+  importName       string        "mapx"         *mapx-convert-config-importName*
+    The name of the variable that mapx will be assigned to in the converted
+    output.
+
+  quotes           table         See below          *mapx-convert-config-quotes*
+    The types of quotes to use when quoting arguments to mapx functions,
+    in order of preference.
+
+    This is a list-like table of (string, string) tuples, where the tuple
+    represents (left-quote, right-quote) pairs.
+
+    The first quote type that doesn't require escaping quotes within the
+    quoted string will be used.
+
+    The default value is:
+>
+      quotes = {
+        { "'", "'" },
+        { '"', '"' },
+        { "[[", "]]" },
+      }
+<
+  optStyle         string        "string"         *mapx-convert-config-optStyle*
+    The style of |mapx-map-options| to use. Valid values:
+
+      "string"     |mapx-option-strings|
+      "vim"        |mapx-option-strings| with <angle brackets>
+      "var"        |mapx-option-vars|
+      "table"      Options in table format.
+
+  out              string        See below             *mapx-convert-config-out*
+    How to output the conversion output. This option should not be used with
+    the conversion script, only if you are calling the `mapx.convert.lua`
+    module directly. Valid values:
+
+      "preview"    Output to the preview window.
+      "print"      Output with Lua's `print()` function.
+      "capture"    Append to the `convert.captured` table
+
+    The default value for the module is "preview".
+    The default value for the conversion script is "print".
+
+  passthrough      boolean       false            *mapx-convert-config-optStyle*
+    If true, `nvim's vim.api.nvim_set_keymap()`/`vim.api.nvim_buf_set_keymap()`
+    will still be called.
+
+==============================================================================
+6. Changelog                                                    *mapx-changelog*
 
 08 Sep 2021                                                             v0.2.0
    Breaking: Deprecated config.quiet in favor of `setup({global = "force"})`
@@ -398,7 +492,7 @@ With |mapx-config-whichkey| support enabled:
   Initial Release
 
 ==============================================================================
-6. License                                                        *mapx-license*
+7. License                                                        *mapx-license*
 >
   MIT License
 
