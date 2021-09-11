@@ -27,8 +27,8 @@ CONTENTS                                                         *mapx-contents*
 ==============================================================================
 1. Intro                                                            *mapx-intro*
 
-Mapx.lua provides lua helper functions that mimic vim's |:map| family of
-commands. It aims to make configuring key bindings from within lua more
+Mapx.nvim provides Lua helper functions that mimic Vim's |:map| family of
+commands. It aims to make configuring key bindings from within Lua more
 ergonomic.
 
 ==============================================================================
