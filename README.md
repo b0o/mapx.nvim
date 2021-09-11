@@ -1,12 +1,12 @@
-# mapx.lua [![version](https://img.shields.io/github/v/tag/b0o/mapx.lua?style=flat&color=yellow&label=version&sort=semver)](https://github.com/b0o/mapx.lua/releases) [![license: MIT](https://img.shields.io/github/license/b0o/mapx.lua?style=flat&color=green)](https://mit-license.org) [![Build Status](https://img.shields.io/github/workflow/status/b0o/mapx.lua/test)](https://github.com/b0o/mapx.lua/actions/workflows/test.yaml)
+# Mapx.nvim [![version](https://img.shields.io/github/v/tag/b0o/mapx.nvim?style=flat&color=yellow&label=version&sort=semver)](https://github.com/b0o/mapx.nvim/releases) [![license: MIT](https://img.shields.io/github/license/b0o/mapx.nvim?style=flat&color=green)](https://mit-license.org) [![Build Status](https://img.shields.io/github/workflow/status/b0o/mapx.nvim/test)](https://github.com/b0o/mapx.nvim/actions/workflows/test.yaml)
 
 A Neovim lua plugin to make mapping more manageable.
 
-mapx.lua provides lua helper functions that mimic vim's `:map` family of
+Mapx.nvim provides lua helper functions that mimic vim's `:map` family of
 commands. Its aim is to make configuring key maps from within lua more
 ergonomic.
 
-Before mapx:
+Before Mapx:
 
 ```lua
 vim.api.nvim_set_keymap("n", "j", "v:count ? 'j' : 'gj'", { noremap = true, expr = true })
@@ -21,7 +21,7 @@ vim.api.nvim_set_keymap("i", "<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]]
 vim.api.nvim_set_keymap("", "<M-/>", ":Commentary<Cr>", { silent = true })
 ```
 
-With mapx:
+With Mapx:
 
 ```lua
 require'mapx'.setup{ global = true }
@@ -131,22 +131,22 @@ mapx.nmap("J", "5j")
 mapx.nmap("K", "5k")
 ```
 
-See [`:h mapx`](https://github.com/b0o/mapx.lua/blob/main/doc/mapx.txt) for the full documentation.
+See [`:h mapx`](https://github.com/b0o/mapx.nvim/blob/main/doc/mapx.txt) for the full documentation.
 
-## Autoconvert your Neovim-style mappings to mapx
+## Autoconvert your Neovim-style mappings to Mapx
 
 Mapx provides the ability to convert mappings that use Neovim's
 `vim.api.nvim_set_keymap()`/`vim.api.nvim_buf_set_keymap()` functions to the
-mapx API.
+Mapx API.
 
-See the [conversion documentation](https://github.com/b0o/mapx.lua/blob/main/conversion.md) for instructions.
+See the [conversion documentation](https://github.com/b0o/mapx.nvim/blob/main/conversion.md) for instructions.
 
 ## Install
 
 [Packer](https://github.com/wbthomason/packer.nvim):
 
 ```lua
-use "b0o/mapx.lua"
+use "b0o/mapx.nvim"
 ```
 
 ## Planned Features
