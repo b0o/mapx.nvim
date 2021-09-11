@@ -3,7 +3,7 @@
 Author:         Maddison Hellstrom <https://github.com/b0o/>
 Licence:        MIT
 Homepage:       https://github.com/b0o/mapx.nvim
-Version:        0.2.0
+Version:        0.2.1
 
 ==============================================================================
 CONTENTS                                                         *mapx-contents*
@@ -460,6 +460,12 @@ Mapx's convert config can contain the following keys:
 
 ==============================================================================
 6. Changelog                                                    *mapx-changelog*
+
+10 Sep 2021                                                             v0.2.1
+   Rename project to Mapx.nvim
+   Add tests
+   Add |mapx-convert| tool
+   Bug fixes
 
 08 Sep 2021                                                             v0.2.0
    Breaking: Deprecated config.quiet in favor of `setup({global = "force"})`
