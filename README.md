@@ -1,10 +1,9 @@
 # Mapx.nvim [![version](https://img.shields.io/github/v/tag/b0o/mapx.nvim?style=flat&color=yellow&label=version&sort=semver)](https://github.com/b0o/mapx.nvim/releases) [![license: MIT](https://img.shields.io/github/license/b0o/mapx.nvim?style=flat&color=green)](https://mit-license.org) [![Build Status](https://img.shields.io/github/workflow/status/b0o/mapx.nvim/test)](https://github.com/b0o/mapx.nvim/actions/workflows/test.yaml)
 
-A Neovim lua plugin to make mapping more manageable.
+A Neovim Lua plugin to make mapping more manageable.
 
-Mapx.nvim provides lua helper functions that mimic vim's `:map` family of
-commands. Its aim is to make configuring key maps from within lua more
-ergonomic.
+Mapx.nvim is a Lua library that mimics Vim's `:map` family of commands.
+Its aim is to make configuring key mappings from within Lua more ergonomic.
 
 Before Mapx:
 
