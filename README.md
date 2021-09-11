@@ -149,6 +149,11 @@ See the [conversion documentation](https://github.com/b0o/mapx.lua/blob/main/con
 use "b0o/mapx.lua"
 ```
 
+## Planned Features
+
+- [ ] Autocommand mappings (a generalization of FileType mappings)
+- [ ] VimL conversion tool
+
 ## Changelog
 
 ```
