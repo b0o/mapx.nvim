@@ -139,7 +139,7 @@ Mapx provides the ability to convert mappings that use Neovim's
 `vim.api.nvim_set_keymap()`/`vim.api.nvim_buf_set_keymap()` functions to the
 mapx API.
 
-See the [conversion documentation](https://github.com/b0o/mapx.lua/convert.md) for instructions.
+See the [conversion documentation](https://github.com/b0o/mapx.lua/blob/main/conversion.md) for instructions.
 
 ## Install
 
