@@ -462,10 +462,10 @@ Mapx's convert config can contain the following keys:
 6. Changelog                                                    *mapx-changelog*
 
 10 Sep 2021                                                             v0.2.1
-   Rename project to Mapx.nvim
-   Add tests
-   Add |mapx-convert| tool
-   Bug fixes
+   Renamed project to Mapx.nvim
+   Added tests
+   Added |mapx-convert| tool
+   Fixed bugs
 
 08 Sep 2021                                                             v0.2.0
    Breaking: Deprecated config.quiet in favor of `setup({global = "force"})`

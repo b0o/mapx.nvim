@@ -157,10 +157,10 @@ use "b0o/mapx.nvim"
 
 ```
 10 Sep 2021                                                             v0.2.1
-   Rename project to Mapx.nvim
-   Add tests
-   Add config auto-conversion tool
-   Bug fixes
+   Renamed project to Mapx.nvim
+   Added tests
+   Added config auto-conversion tool
+   Fixed bugs
 
 08 Sep 2021                                                             v0.2.0
    Breaking: Deprecated config.quiet in favor of `setup({global = "force"})`
