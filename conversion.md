@@ -30,7 +30,7 @@ mapx.noremap('gR', '<cmd>Trouble lsp_references<cr>', 'buffer')
 You can provide a configuration table via the `-c` flag. For example:
 
 ```sh
-$ /path/to/mapx.nvim/scripts/convert -c '{ config = { global = true }, optStyle = "string" }'` /tmp/maps.lua
+$ /path/to/mapx.nvim/scripts/convert -c '{ config = { global = true }, optStyle = "string" }' /tmp/maps.lua
 local mapx = require'mapx'.setup{
   global = true
 }
