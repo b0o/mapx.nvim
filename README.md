@@ -150,12 +150,12 @@ use "b0o/mapx.nvim"
 
 ## Wishlist
 
-- [ ] Autocommand mappings (a generalization of FileType mappings)
-- [ ] VimL conversion tool
-- [ ] [Telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) integration
-- [ ] API for creating user commands and autocommands
-- [ ] Support passing mapping mode in opts 
-- [ ] Support specifying multiple modes as a string like 'nvt'
+- [ ] Autocommand mappings (a generalization of FileType mappings).
+- [ ] VimL conversion tool.
+- [ ] [Telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) integration.
+- [ ] API for creating user commands and autocommands.
+- [ ] Support passing mapping mode in opts.
+- [ ] Support specifying multiple modes as a string like 'nvt'.
 - [ ] Support specifying labels on groups which become which-key group names.
 - [ ] Support progressively building up maps with groups, like:
   ```lua
