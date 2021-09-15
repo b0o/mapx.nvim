@@ -156,6 +156,7 @@ use "b0o/mapx.nvim"
 - [ ] API for creating user commands and autocommands
 - [ ] Support passing mapping mode in opts 
 - [ ] Support specifying multiple modes as a string like 'nvt'
+- [ ] Support specifying labels on groups which become which-key group names.
 - [ ] Support progressively building up maps with groups, like:
   ```lua
   mapx.group({ prefix = "<leader>t" }, "LSP", function()
