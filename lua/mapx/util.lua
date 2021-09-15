@@ -1,5 +1,10 @@
 local M = {}
 
+-- Flat merge of 2 or more tables, supporting a mixture of map-like tables and
+-- list-list tables.
+-- - Right-most arguments take precedence.
+-- - Numeric indices are extended, not replaced.
+-- - No side effects.
 function M.merge(...)
   local res = {}
   for i = 1, select('#', ...) do
