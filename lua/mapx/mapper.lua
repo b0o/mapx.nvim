@@ -121,6 +121,7 @@ function Mapper:registerMap(mode, lhs, rhs, opts, wkopts, label)
       local regopts = merge({
         mode = mode ~= '' and mode or nil,
       }, wkopts)
+      regopts.silent = regopts.silent ~= nil and regopts.silent or false
       dbgi("Mapper:registerMap (whichkey)", {mode=mode, regval=regval, regopts=regopts})
       self.whichkey.register(regval, regopts)
     end
