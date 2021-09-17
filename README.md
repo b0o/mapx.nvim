@@ -150,6 +150,9 @@ use "b0o/mapx.nvim"
 
 ## Wishlist
 
+Mapx aims to be the most powerful way to configure key mappings. To that end,
+we'd like to include the following features in future versions:
+
 - [ ] Autocommand mappings (a generalization of FileType mappings).
 - [ ] VimL conversion tool.
 - [ ] [Telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) integration.
@@ -187,6 +190,8 @@ use "b0o/mapx.nvim"
   nnoremap ("<leader>lwr", "<cmd>lua vim.lsp.buf.remove_workspace_folder()<Cr>",                    "LSP-Workspace: Rm folder")
   nnoremap ("<leader>lwl", "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<Cr>", "LSP-Workspace: List folders")
   ```
+- [ ] Better test coverage
+- [ ] Support setting default opts in `.setup{}`
 
 ## Changelog
 
