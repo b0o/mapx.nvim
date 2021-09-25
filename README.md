@@ -11,8 +11,8 @@ Before Mapx:
 vim.api.nvim_set_keymap("n", "j", "v:count ? 'j' : 'gj'", { noremap = true, expr = true })
 vim.api.nvim_set_keymap("n", "k", "v:count ? 'k' : 'gk'", { noremap = true, expr = true })
 
-vim.api.nvim_set_keymap("n", "J", "5j")
-vim.api.nvim_set_keymap("n", "K", "5k")
+vim.api.nvim_set_keymap("n", "J", "5j", {})
+vim.api.nvim_set_keymap("n", "K", "5k", {})
 
 vim.api.nvim_set_keymap("i", "<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], { noremap = true, silent = true, expr = true })
 vim.api.nvim_set_keymap("i", "<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], { noremap = true, silent = true, expr = true })

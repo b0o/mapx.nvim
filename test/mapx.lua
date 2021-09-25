@@ -1,5 +1,5 @@
-local mapx = require'mapx'
+local mapx = require 'mapx'
 
-it("can require mapx", function()
+it('can require mapx', function()
   expect.isTable(mapx)
 end)
