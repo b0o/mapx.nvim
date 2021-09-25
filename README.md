@@ -161,6 +161,7 @@ we'd like to include the following features in future versions:
 - [ ] Support specifying multiple modes as a string like 'nvt'.
 - [ ] Support specifying labels on groups which become which-key group names.
 - [ ] Support progressively building up maps with groups, like:
+
   ```lua
   mapx.group({ prefix = "<leader>t" }, "LSP", function()
     mapx.group({ prefix = "g" }, "Goto", function()
@@ -190,8 +191,11 @@ we'd like to include the following features in future versions:
   nnoremap ("<leader>lwr", "<cmd>lua vim.lsp.buf.remove_workspace_folder()<Cr>",                    "LSP-Workspace: Rm folder")
   nnoremap ("<leader>lwl", "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<Cr>", "LSP-Workspace: List folders")
   ```
+
 - [ ] Better test coverage
 - [ ] Support setting default opts in `.setup{}`
+- [ ] Benchmarks
+- [ ] Performance optimization (especially WhichKey integration)
 
 ## Changelog
 
