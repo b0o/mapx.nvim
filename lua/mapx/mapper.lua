@@ -1,5 +1,5 @@
-local merge = require'mapx.util'.merge
-local log = require'mapx.log'
+local merge = require('mapx.util').merge
+local log = require 'mapx.log'
 
 local dbgi = log.dbgi
 
@@ -9,7 +9,7 @@ local Mapper = {
     nowait = { nowait = true },
     silent = { silent = true },
     script = { script = true },
-    expr   = { expr   = true },
+    expr = { expr = true },
     unique = { unique = true },
   },
 }
@@ -20,12 +20,12 @@ local Mapper = {
 local function expandStringOpts(opts)
   local res = {}
   for k, v in pairs(opts) do
-    if type(k) == "number" then
+    if type(k) == 'number' then
       if Mapper.mapopts[v] then
         res[v] = true
         goto continue
       end
-      local vsub = type(v) == "string" and vim.fn.substitute(v, [[^<\|>$]], "", "g")
+      local vsub = type(v) == 'string' and vim.fn.substitute(v, [[^<\|>$]], '', 'g')
       if vsub and Mapper.mapopts[vsub] ~= nil then
         res[vsub] = true
         goto continue
@@ -63,12 +63,12 @@ function Mapper.new()
     groupOpts = {},
     whichkey = nil,
   }
-  vim.cmd([[
+  vim.cmd [[
     augroup mapx_mapper
       autocmd!
       autocmd FileType * lua require'mapx'.mapper:filetype(vim.fn.expand('<amatch>'))
     augroup END
-  ]])
+  ]]
   return setmetatable(self, { __index = Mapper })
 end
 
@@ -77,17 +77,17 @@ function Mapper:setup(config)
   if self.config.whichkey then
     local ok, wk = pcall(require, 'which-key')
     if not ok then
-      error('mapx.Map:setup: config.whichkey == true but module "which-key" not found')
+      error 'mapx.Map:setup: config.whichkey == true but module "which-key" not found'
     end
     self.whichkey = wk
   end
-  dbgi("mapx.Map:setup", self)
+  dbgi('mapx.Map:setup', self)
   return self
 end
 
 function Mapper:filetypeMap(fts, fn)
-  dbgi("Map.filetype", {fts=fts,fn=fn})
-  if type(fts) ~= "table" then
+  dbgi('Map.filetype', { fts = fts, fn = fn })
+  if type(fts) ~= 'table' then
     fts = { fts }
   end
   for _, ft in ipairs(fts) do
@@ -96,13 +96,15 @@ function Mapper:filetypeMap(fts, fn)
     end
     table.insert(self.filetypeMaps[ft], fn)
   end
-  dbgi("mapx.Map.filetypeMaps insert", self.filetypeMaps)
+  dbgi('mapx.Map.filetypeMaps insert', self.filetypeMaps)
 end
 
 function Mapper:filetype(ft, ...)
   local filetypeMaps = self.filetypeMaps[ft]
-  dbgi("mapx.Map:handleFiletype", {ft=ft,ftMaps=filetypeMaps,rest={...}})
-  if filetypeMaps == nil then return end
+  dbgi('mapx.Map:handleFiletype', { ft = ft, ftMaps = filetypeMaps, rest = { ... } })
+  if filetypeMaps == nil then
+    return
+  end
   for _, fn in ipairs(filetypeMaps) do
     fn(...)
   end
@@ -110,7 +112,9 @@ end
 
 function Mapper:func(id, ...)
   local fn = self.luaFuncs[id]
-  if fn == nil then return end
+  if fn == nil then
+    return
+  end
   return fn(...)
 end
 
@@ -122,40 +126,42 @@ function Mapper:registerMap(mode, lhs, rhs, opts, wkopts, label)
         mode = mode ~= '' and mode or nil,
       }, wkopts)
       regopts.silent = regopts.silent ~= nil and regopts.silent or false
-      dbgi("Mapper:registerMap (whichkey)", {mode=mode, regval=regval, regopts=regopts})
+      dbgi('Mapper:registerMap (whichkey)', { mode = mode, regval = regval, regopts = regopts })
       self.whichkey.register(regval, regopts)
     end
   elseif opts.buffer then
     local bopts = merge({}, opts)
     bopts.buffer = nil
-    dbgi("Mapper:registerMap (buffer)",{mode=mode, lhs=lhs, rhs=rhs, opts=opts, bopts=bopts})
+    dbgi('Mapper:registerMap (buffer)', { mode = mode, lhs = lhs, rhs = rhs, opts = opts, bopts = bopts })
     vim.api.nvim_buf_set_keymap(opts.buffer, mode, lhs, rhs, bopts)
   else
-    dbgi("Mapper:registerMap",{mode=mode, lhs=lhs, rhs=rhs, opts=opts})
+    dbgi('Mapper:registerMap', { mode = mode, lhs = lhs, rhs = rhs, opts = opts })
     vim.api.nvim_set_keymap(mode, lhs, rhs, opts)
   end
 end
 
 function Mapper:registerName(mode, lhs, opts)
-  if opts.name == nil then error("mapx.name: missing name") end
+  if opts.name == nil then
+    error 'mapx.name: missing name'
+  end
   if self.whichkey then
     local reg = {
       [lhs] = {
-        name = opts.name
-      }
+        name = opts.name,
+      },
     }
-    local regopts = merge({
+    local regopts = merge {
       buffer = opts.buffer or nil,
       mode = mode ~= '' and mode or nil,
-    })
-    dbgi("Mapper:registerName", {mode=mode, reg=reg, regopts=regopts})
+    }
+    dbgi('Mapper:registerName', { mode = mode, reg = reg, regopts = regopts })
     self.whichkey.register(reg, regopts)
   end
 end
 
 function Mapper:register(config, lhss, rhs, ...)
-  if type(config) ~= "table" then
-    config = { mode = config, type = "map" }
+  if type(config) ~= 'table' then
+    config = { mode = config, type = 'map' }
   end
   local opts = merge(self.groupOpts, ...)
   local ft = opts.filetype or opts.ft
@@ -163,7 +169,9 @@ function Mapper:register(config, lhss, rhs, ...)
     opts.ft = nil
     opts.filetype = nil
     opts.buffer = opts.buffer or 0
-    self:filetypeMap(ft, function() self:register(config, lhss, rhs, opts) end)
+    self:filetypeMap(ft, function()
+      self:register(config, lhss, rhs, opts)
+    end)
     return
   end
   opts = expandStringOpts(opts)
@@ -176,18 +184,18 @@ function Mapper:register(config, lhss, rhs, ...)
     label, wkopts = extractLabel(opts)
   end
   if type(lhss) ~= 'table' then
-    lhss = {lhss}
+    lhss = { lhss }
   end
   if type(rhs) == 'function' then
     -- TODO: rhs gets inserted multiple times if a filetype mapping is
     -- triggered multiple times
     table.insert(self.luaFuncs, rhs)
-    dbgi("state.funcs insert", {luaFuncs=self.luaFuncs})
-    local luaexpr = "require'mapx'.mapper:func(" .. #self.luaFuncs .. ", vim.v.count)"
+    dbgi('state.funcs insert', { luaFuncs = self.luaFuncs })
+    local luaexpr = "require'mapx'.mapper:func(" .. #self.luaFuncs .. ', vim.v.count)'
     if opts.expr then
       rhs = 'luaeval("' .. luaexpr .. '")'
     else
-      rhs = "<Cmd>lua " .. luaexpr .. "<Cr>"
+      rhs = '<Cmd>lua ' .. luaexpr .. '<Cr>'
     end
   end
   for _, lhs in ipairs(lhss) do
@@ -202,7 +210,7 @@ end
 function Mapper:group(...)
   local prevOpts = self.groupOpts
   local fn
-  local args = {...}
+  local args = { ... }
   for i, v in ipairs(args) do
     if i < #args then
       self.groupOpts = merge(self.groupOpts, v)
@@ -211,10 +219,10 @@ function Mapper:group(...)
     end
   end
   self.groupOpts = expandStringOpts(self.groupOpts)
-  dbgi("group", self.groupOpts)
+  dbgi('group', self.groupOpts)
   local label = extractLabel(self.groupOpts)
   if label ~= nil then
-    error("mapx.group: cannot set label on group: " .. tostring(label))
+    error('mapx.group: cannot set label on group: ' .. tostring(label))
   end
   fn()
   self.groupOpts = prevOpts

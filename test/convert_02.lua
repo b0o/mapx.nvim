@@ -1,10 +1,10 @@
-it("supports {global = true}", function()
-  local convert = require'mapx.convert.lua'.setup({
+it('supports {global = true}', function()
+  local convert = require('mapx.convert.lua').setup {
     out = 'capture',
     passthrough = false,
-    config = { global = true }
-  })
-  local expected = vim.trim([[
+    config = { global = true },
+  }
+  local expected = vim.trim [[
 require'mapx'.setup{
   global = true
 }
@@ -15,8 +15,8 @@ nnoremap('<leader>xl', '<cmd>Trouble loclist<cr>', 'silent')
 nnoremap('<leader>xq', '<cmd>Trouble quickfix<cr>', 'silent')
 nnoremap('gR', '<cmd>Trouble lsp_references<cr>', 'silent')
 nnoremap('gR', '<cmd>Trouble lsp_references<cr>', 'buffer', 'silent')
-  ]])
-  loadTestData("convert")
-  local result = table.concat(convert.captured, "\n")
+  ]]
+  loadTestData 'convert'
+  local result = table.concat(convert.captured, '\n')
   expect.equal(expected, result)
 end)

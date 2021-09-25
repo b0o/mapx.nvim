@@ -11,7 +11,7 @@ function M.merge(...)
     local arg = select(i, ...)
     if type(arg) == 'table' then
       for k, v in pairs(arg) do
-        if type(k) == "number" then
+        if type(k) == 'number' then
           table.insert(res, v)
         else
           res[k] = v
