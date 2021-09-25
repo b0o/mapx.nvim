@@ -45,6 +45,8 @@ Create multiple mappings to the same action in one shot:
 nnoremap({"<C-f><C-f>", "<C-f>f"}, ":lua require('telescope.builtin').find_files()<Cr>", "silent")
 ```
 
+#### WhichKey Integration
+
 Integrate with [which-key.nvim](https://github.com/folke/which-key.nvim) by
 passing a label as the final argument:
 
@@ -61,14 +63,18 @@ nnoremap("<leader>ls", ":LspStart<Cr>",   "LSP: Start LSP")
 nnoremap("<leader>lS", ":LspStop<Cr>",    "LSP: Stop LSP")
 ```
 
-Create FileType maps:
+#### FileType Mappings
+
+FileType mappings will be applied only to buffers with a matching filetype.
 
 ```lua
 nnoremap("<tab>",   [[:call search('\(\w\+(\w\+)\)', 's')<Cr>]],  "silent", { ft = "man" })
 nnoremap("<S-tab>", [[:call search('\(\w\+(\w\+)\)', 'sb')<Cr>]], "silent", { ft = "man" })
 ```
 
-Group maps with common options to reduce repetition:
+#### Groups
+
+Mappings with common options can be grouped to reduce repetition.
 
 ```lua
 mapx.group("silent", { ft = "man" }, function()
@@ -77,7 +83,9 @@ mapx.group("silent", { ft = "man" }, function()
 end)
 ```
 
-Map Lua functions:
+#### Lua Function Mappings
+
+The `{rhs}` of a mapping can be a Lua function.
 
 ```lua
 map("<leader>hi", function() print("Hello!") end, "silent")
@@ -90,6 +98,22 @@ nnoremap("k", function(count) return count > 0 and "k" or "gk" end, "silent", "e
 local counter = 1
 map("zz", function() print("Hello " .. counter); counter = counter + 1 end, "silent")
 ```
+
+#### Buffer Mappings
+
+Mappings can be applied to the current buffer, or to a specific buffer.
+
+```lua
+-- Use the current buffer
+nnoremap("<C-]>", ":call man#get_page_from_cword('horizontal', v:count)<CR>", "silent", "buffer")
+
+-- Use a specific buffer
+nnoremap("<C-]>", ":call man#get_page_from_cword('horizontal', v:count)<CR>", "silent", {
+  buffer = vim.api.nvim_win_get_buf(myWindowVariable)
+})
+```
+
+#### Map Options
 
 There are various ways to specify map options:
 
@@ -110,19 +134,9 @@ nnoremap ("j", "v:count ? 'j' : 'gj'", "silent", "expr")
 nnoremap ("j", "v:count ? 'j' : 'gj'", "<silent>", "<expr>")
 ```
 
-Create buffer maps:
+#### Global Functions
 
-```lua
--- Use the current buffer
-nnoremap("<C-]>", ":call man#get_page_from_cword('horizontal', v:count)<CR>", "silent", "buffer")
-
--- Use a specific buffer
-nnoremap("<C-]>", ":call man#get_page_from_cword('horizontal', v:count)<CR>", "silent", {
-  buffer = vim.api.nvim_win_get_buf(myWindowVariable)
-})
-```
-
-Adding the map functions to the global scope is optional:
+Adding the Mapx map functions to the global scope is opt-in.
 
 ```lua
 local mapx = require'mapx'
@@ -130,9 +144,11 @@ mapx.nmap("J", "5j")
 mapx.nmap("K", "5k")
 ```
 
-See [`:h mapx`](https://github.com/b0o/mapx.nvim/blob/main/doc/mapx.txt) for the full documentation.
+#### Documentation
 
-## Autoconvert your Neovim-style mappings to Mapx
+Mapx is fully documented. See [`:help mapx`](https://github.com/b0o/mapx.nvim/blob/main/doc/mapx.txt).
+
+#### Autoconvert your Neovim-style mappings to Mapx
 
 Mapx provides the ability to convert mappings that use Neovim's
 `vim.api.nvim_set_keymap()`/`vim.api.nvim_buf_set_keymap()` functions to the
