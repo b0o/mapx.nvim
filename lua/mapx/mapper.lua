@@ -66,7 +66,7 @@ function Mapper.new()
   vim.cmd [[
     augroup mapx_mapper
       autocmd!
-      autocmd FileType * lua require'mapx'.mapper:filetype(vim.fn.expand('<amatch>'))
+      autocmd FileType * lua require'mapx'.mapper:filetype(vim.fn.expand('<amatch>'), vim.fn.expand('<abuf>'))
     augroup END
   ]]
   return setmetatable(self, { __index = Mapper })
@@ -99,14 +99,14 @@ function Mapper:filetypeMap(fts, fn)
   dbgi('mapx.Map.filetypeMaps insert', self.filetypeMaps)
 end
 
-function Mapper:filetype(ft, ...)
+function Mapper:filetype(ft, buf, ...)
   local filetypeMaps = self.filetypeMaps[ft]
   dbgi('mapx.Map:handleFiletype', { ft = ft, ftMaps = filetypeMaps, rest = { ... } })
   if filetypeMaps == nil then
     return
   end
   for _, fn in ipairs(filetypeMaps) do
-    fn(...)
+    fn(buf, ...)
   end
 end
 
@@ -168,8 +168,8 @@ function Mapper:register(config, lhss, rhs, ...)
   if ft ~= nil then
     opts.ft = nil
     opts.filetype = nil
-    opts.buffer = opts.buffer or 0
-    self:filetypeMap(ft, function()
+    self:filetypeMap(ft, function(buf)
+      opts.buffer = opts.buffer or buf
       self:register(config, lhss, rhs, opts)
     end)
     return
