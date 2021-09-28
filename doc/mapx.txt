@@ -454,7 +454,7 @@ Mapx's convert config can contain the following keys:
     The default value for the module is "preview".
     The default value for the conversion script is "print".
 
-  passthrough      boolean       false            *mapx-convert-config-optStyle*
+  passthrough      boolean       false         *mapx-convert-config-passthrough*
     If true, `nvim's vim.api.nvim_set_keymap()`/`vim.api.nvim_buf_set_keymap()`
     will still be called.
 
