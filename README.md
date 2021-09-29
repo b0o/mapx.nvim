@@ -91,8 +91,8 @@ The `{rhs}` of a mapping can be a Lua function.
 map("<leader>hi", function() print("Hello!") end, "silent")
 
 -- Expression maps work too:
-nnoremap("j", function(count) return count > 0 and "j" or "gj" end, "silent", "expr")
-nnoremap("k", function(count) return count > 0 and "k" or "gk" end, "silent", "expr")
+nnoremap("j", function() return vim.v.count > 0 and "j" or "gj" end, "silent", "expr")
+nnoremap("k", function() return vim.v.count > 0 and "k" or "gk" end, "silent", "expr")
 
 -- The mapped function is a closure:
 local counter = 1
