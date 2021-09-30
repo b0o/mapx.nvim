@@ -93,10 +93,6 @@ map("<leader>hi", function() print("Hello!") end, "silent")
 -- Expression maps work too:
 nnoremap("j", function() return vim.v.count > 0 and "j" or "gj" end, "silent", "expr")
 nnoremap("k", function() return vim.v.count > 0 and "k" or "gk" end, "silent", "expr")
-
--- The mapped function is a closure:
-local counter = 1
-map("zz", function() print("Hello " .. counter); counter = counter + 1 end, "silent")
 ```
 
 #### Buffer Mappings
