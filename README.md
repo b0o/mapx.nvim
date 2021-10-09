@@ -5,7 +5,7 @@ A Neovim Lua plugin to make mapping more manageable.
 Mapx.nvim is a Lua library that mimics Vim's `:map` family of commands.
 Its aim is to make configuring key mappings from within Lua more ergonomic.
 
-Before Mapx:
+Without Mapx:
 
 ```lua
 vim.api.nvim_set_keymap("n", "j", "v:count ? 'j' : 'gj'", { noremap = true, expr = true })
