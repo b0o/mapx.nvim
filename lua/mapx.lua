@@ -2,6 +2,7 @@ local Mapper = require 'mapx.mapper'
 local log = require 'mapx.log'
 local merge = require('mapx.util').merge
 local deprecated = require 'mapx.deprecated'
+local cmd = require 'mapx.cmd'
 
 local dbgi = log.dbgi
 
@@ -352,6 +353,11 @@ end
 -- @vararg opts  string|table Map options such as { buffer } or { filetype }.
 function mapx.tname(lhs, name, ...)
   return mapx.mapper:register({ mode = 't', type = 'name' }, lhs, nil, { name = name }, ...)
+end
+
+-- Specify a Vim command
+function mapx.cmd()
+  cmd()
 end
 
 return mapx

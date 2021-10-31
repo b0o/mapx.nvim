@@ -2,193 +2,185 @@ local cmd = {}
 
 -- public
 
-function cmd.pvimcmd(c)
-	local ran, res = pcall(vim.cmd, c)
-	if not ran then
-		error(res)
-	end
+local function create(self, name, fun, args)
+  args = args or {}
+  local cmd_str = ''
+  cmd_str = cmd_str .. self.__generate_header(name, args) .. ' '
+
+  local new_fun = fun
+  if type(fun) == 'table' then
+    new_fun = function(...)
+      for _, f in ipairs(fun) do
+        f(unpack(...))
+      end
+    end
+  end
+
+  if type(new_fun) == 'function' then
+    self.__storage[self.key(name)] = new_fun
+    cmd_str = cmd_str .. self.__generate_brigde(name, args) .. ' '
+    for mem_name, __template in pairs(self) do
+      if string.match(mem_name, 'template$') then
+        cmd_str = cmd_str .. __template(name, args) .. ' '
+      end
+    end
+    cmd_str = cmd_str .. self.__generate_call(name, args) .. ' '
+  elseif type(new_fun) == 'string' then
+    cmd_str = cmd_str .. new_fun .. ' '
+  else
+    error('Wrong command function type for command: ' .. name)
+    return
+  end
+
+  cmd_str = self.__normalize(cmd_str)
+  vim.cmd(cmd_str)
 end
 
-local function create(self, n, f, a)
-	a = a or {}
-	local c = ""
-	c = c .. self.__header_gen(n, a) .. " "
-
-	local _f = f
-	if type(_f) == "table" then
-		_f = function(...)
-			for _, __f in ipairs(f) do
-				__f(unpack(...))
-			end
-		end
-	end
-
-	if type(_f) == "function" then
-		self.__cmd[self.__key(n)] = _f
-		c = c .. self.__bridge_gen(n, a) .. " "
-		for k, tmp in pairs(self) do
-			if string.match(k, "tmp$") then
-				c = c .. tmp(n, a) .. " "
-			end
-		end
-		c = c .. self.__call_gen(n, a) .. " "
-	elseif type(_f) == "string" then
-		c = c .. _f .. " "
-	else
-		print("Wrong command function type for command: " .. n)
-		return
-	end
-
-	c = self.__body(c)
-	self.pvimcmd(c)
-end
-
-setmetatable(cmd, { __call = create })
+setmetatable(cmd, { call = create })
 
 -- private
 
-cmd.__cmd = {}
+cmd.__storage = {}
 
-function cmd.__key(n)
-	return n
+function cmd.__key(name)
+  return name
 end
 
-function cmd.__num(n)
-	return n
+function cmd.__num(value)
+  return value
 end
 
-function cmd.__range(n, f, l)
-	if n == 1 then
-		return { line = f }
-	elseif n == 2 then
-		return { first = f, last = l }
-	end
+function cmd.__range(number, first, last)
+  if number == 1 then
+    return { line = first }
+  elseif number == 2 then
+    return { first = first, last = last }
+  end
 
-	return {}
+  return {}
 end
 
-function cmd.__reg(s)
-	return s
+function cmd.__register(value)
+  return value
 end
 
-function cmd.__bang(s)
-	return s == "!"
+function cmd.__bang(value)
+  return value == '!'
 end
 
-function cmd.__count(c)
-	if c > 0 then
-		return c
-	else
-		return nil
-	end
+function cmd.__count(value)
+  if value > 0 then
+    return value
+  else
+    return nil
+  end
 end
 
-function cmd.__mods(m)
-	local o = {}
-	for v in string.gmatch(m or "", "%S+") do
-		table.insert(o, v)
-	end
-	return o
+function cmd.__modifiers(value)
+  local mod_obj = {}
+  for mod in string.gmatch(value or '', '%S+') do
+    table.insert(mod_obj, mod)
+  end
+  return mod_obj
 end
 
-function cmd.__args(...)
-	local r = {}
-	for _, v in ipairs({ ... }) do
-		table.insert(r, load("return " .. v)())
-	end
-	return r
+function cmd.__arguments(...)
+  local arg_obj = {}
+  for _, arg in ipairs { ... } do
+    table.insert(arg_obj, load('return ' .. arg)())
+  end
+  return arg_obj
 end
 
-function cmd.__body(c)
-	c = string.gsub(c, "%s+", " ")
-	c = string.gsub(c, "^%s+", "")
-	c = string.gsub(c, "%s+$", "")
-	return c
+function cmd.__normalize(cmd_str)
+  cmd_str = string.gsub(cmd_str, '%s+', ' ')
+  cmd_str = string.gsub(cmd_str, '^%s+', '')
+  cmd_str = string.gsub(cmd_str, '%s+$', '')
+  return cmd_str
 end
 
-function cmd.__header_gen(n, a)
-	local r = ""
+function cmd.__header_gen(name, args)
+  local header = ''
 
-	if type(a) == "table" then
-		for k, v in pairs(a) do
-			if type(v) == "boolean" then
-				if v then
-					r = r .. " -" .. k
-				end
-			else
-				r = r .. " -" .. k .. "=" .. v
-			end
-		end
-	elseif type(a) == "string" then
-		r = a
-	else
-		print("Wrong type of args for command: " .. n)
-	end
+  if type(args) == 'table' then
+    for arg_name, arg_val in pairs(args) do
+      if type(arg_val) == 'boolean' then
+        if arg_val then
+          header = header .. ' -' .. arg_name
+        end
+      else
+        header = header .. ' -' .. arg_name .. '=' .. arg_val
+      end
+    end
+  elseif type(args) == 'string' then
+    header = args
+  else
+    error('Wrong type of args for command: ' .. name)
+  end
 
-	return string.format([[ command! %s %s ]], r, n)
+  return string.format([[ command! %s %s ]], header, name)
 end
 
-function cmd.__bridge_gen(_, _)
-	return [[ lua local cmd = require 'user.util.cmd' ]]
+function cmd.__generate_brigde(_, _)
+  return [[ lua local cmd = require 'mapx.cmd' ]]
 end
 
-function cmd.__range_tmp(_, a)
-	if a.range then
-		return [[
+function cmd.__range_template(_, args)
+  if args.range then
+    return [[
         local range = cmd.__range(
-            cmd.__num(<range>), 
-            cmd.__num(<line1>),
-            cmd.__num(<line2>))
+            cmd.__number(<range>),
+            cmd.__number(<line1>),
+            cmd.__number(<line2>))
         ]]
-	end
+  end
 
-	return [[ local range = nil ]]
+  return [[ local range = nil ]]
 end
 
-function cmd.__count_tmp(_, a)
-	if a.count then
-		return [[ local count = cmd.__count(<count>) ]]
-	end
-	return [[ local count = nil ]]
+function cmd.__count_template(_, args)
+  if args.count then
+    return [[ local count = cmd.__count(<count>) ]]
+  end
+  return [[ local count = nil ]]
 end
 
-function cmd.__bang_tmp(_, a)
-	if a.bang then
-		return [[ local bang = cmd.__bang(<bang>) ]]
-	end
-	return [[ local bang = nil ]]
+function cmd.__bang_template(_, args)
+  if args.bang then
+    return [[ local bang = cmd.__bang(<bang>) ]]
+  end
+  return [[ local bang = nil ]]
 end
 
-function cmd.__mods_tmp(_, _)
-	return [[ local mods = cmd.__mods(<q-mods>) ]]
+function cmd.__modifier_template(_, _)
+  return [[ local modifiers = cmd.__modifiers(<q-mods>) ]]
 end
 
-function cmd.__reg_tmp(_, a)
-	if a.register then
-		return [[ local reg = cmd.__reg(<reg>) ]]
-	end
-	return [[ local reg = nil ]]
+function cmd.__register_template(_, args)
+  if args.register then
+    return [[ local register = cmd.__register(<reg>) ]]
+  end
+  return [[ local regregister = nil ]]
 end
 
-function cmd.__args_tmp(_, _)
-	return [[ local args = cmd.__args(<f-args>) ]]
+function cmd.__arguments_template(_, _)
+  return [[ local arguments = cmd.__arguments(<f-args>) ]]
 end
 
-function cmd.__call_gen(n, _)
-	return string.format(
-		[[
-    local ran, res = pcall(cmd.__cmd["%s"], {
+function cmd.__generate_call(name, _)
+  return string.format(
+    [[
+    cmd.__storage["%s"], {
         range = range,
         count = count,
         bang = bang,
-        mods = mods,
-        reg = reg,
-        args = args,
-    })
-    if not ran then error(res) end
+        modifiers = modifiers,
+        register = register,
+        arguments = arguments,
+    }
     ]],
-		require("user.util.cmd").__key(n)
-	)
+    cmd.__key(name)
+  )
 end
 
 return cmd
