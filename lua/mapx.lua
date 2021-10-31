@@ -356,8 +356,59 @@ function mapx.tname(lhs, name, ...)
 end
 
 -- Specify a Vim command
-function mapx.cmd()
-  cmd()
+--
+-- @param  name string
+-- Name of the command
+--
+-- @param  fun string|function|table
+-- Vim command string or Lua function or table of functions.
+-- If using Lua, the function(s) will be passed a single argument as table
+-- of all the options the user passed to the command such as arguments,
+-- modifiers and the bang character.
+-- Each of the options can be nil depending on if the user passed the option or
+-- if the command supports the option.
+-- The options arguments and modifiers are never nil and are empty tables if the
+-- user passes none.
+-- Note that the range and count options are mutually exclusive because the
+-- commands in Vim can't accept both at the same time.
+-- The possible keys and values of options are:
+--  - arguments: table - arguments passed through the command line which are
+--                       evaluated once using the Lua load function
+--
+--  - modifiers: table - modifiers passed through the command line such as
+--                       "vertical" and "rightbelow"
+--
+--  - register: string - if the command was not created with the "register"
+--                       attribute then this is always nil, otherwise it is the
+--                       name of the register the user passed to the command and
+--                       an empty string if the user did not pass a register to
+--                       the command
+--
+--  - range: table - if the command was not created with the "range" attribute
+--                   then this is always nil, otherwise if the user selected a
+--                   range of lines the keys "first" and "last" will contain the
+--                   numbers of first and last line of the range, else if the
+--                   user passed a line number on the command line the key
+--                   "line" will be set to the number of the line, else the
+--                   range will be an empty object
+--
+--  - count: number - if the command was not created with the "count" attribute
+--                    or if the user did not pass a count on the command line
+--                    than this is nil, otherwise this is  the number the user
+--                    passed to the command on the commandline
+--
+--  - bang: boolean - if the command was not created with the "bang" attribute
+--                    then this is always nil, otherwise if the user passed the
+--                    bang on the command line then this will be true, and if
+--                    the user executed this command without the bang, this will
+--                    be false
+--
+-- @vararg attr table
+-- Vim command attributes such as "nargs" and "complete".
+--
+-- @see See the result of ":help :command" for more information.
+function mapx.cmd(name, fun, ...)
+  cmd(name, fun, merge(...))
 end
 
 return mapx
