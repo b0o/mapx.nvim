@@ -415,9 +415,9 @@ end
 function mapx.cmd(name, fun, ...)
   local new_fun = fun
   if type(fun) == 'table' then
-    new_fun = function(...)
+    new_fun = function(opt)
       for _, f in ipairs(fun) do
-        f(unpack(...))
+        f(opt)
       end
     end
   end

@@ -8,7 +8,7 @@ local function create(self, name, fun, args)
   cmd_str = cmd_str .. self.__generate_header(name, args) .. ' '
 
   if type(fun) == 'function' then
-    self.__storage[self.key(name)] = fun
+    self.__storage[self.__key(name)] = fun
     cmd_str = cmd_str .. self.__generate_brigde(name, args) .. ' '
     for mem_name, __template in pairs(self) do
       if string.match(mem_name, 'template$') then
@@ -27,7 +27,7 @@ local function create(self, name, fun, args)
   vim.cmd(cmd_str)
 end
 
-setmetatable(cmd, { call = create })
+cmd = setmetatable(cmd, { __call = create })
 
 -- private
 
@@ -90,7 +90,7 @@ function cmd.__normalize(cmd_str)
   return cmd_str
 end
 
-function cmd.__header_gen(name, args)
+function cmd.__generate_header(name, args)
   local header = ''
 
   if type(args) == 'table' then
@@ -138,7 +138,7 @@ end
 
 function cmd.__bang_template(_, args)
   if args.bang then
-    return [[ local bang = cmd.__bang(<bang>) ]]
+    return [[ local bang = cmd.__bang(<q-bang>) ]]
   end
   return [[ local bang = nil ]]
 end
@@ -149,9 +149,9 @@ end
 
 function cmd.__register_template(_, args)
   if args.register then
-    return [[ local register = cmd.__register(<reg>) ]]
+    return [[ local register = cmd.__register(<q-reg>) ]]
   end
-  return [[ local regregister = nil ]]
+  return [[ local register = nil ]]
 end
 
 function cmd.__arguments_template(_, _)
@@ -161,7 +161,7 @@ end
 function cmd.__generate_call(name, _)
   return string.format(
     [[
-    cmd.__storage["%s"], {
+    cmd.__storage["%s"] {
         range = range,
         count = count,
         bang = bang,
