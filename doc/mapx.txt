@@ -19,6 +19,7 @@ CONTENTS                                                         *mapx-contents*
       3.4. WhichKey Names ................... |mapx-whichkey-names|
       3.5. Buffer-local Maps ................ |mapx-buffer-maps|
       3.6. Lua Function Maps ................ |mapx-lua-maps|
+      3.7. Commands ......................... |mapx-commands|
     4. Examples ............................. |mapx-examples|
     5. Auto-Conversion ...................... |mapx-convert|
     6. Changelog ............................ |mapx-changelog|
@@ -27,9 +28,9 @@ CONTENTS                                                         *mapx-contents*
 ==============================================================================
 1. Intro                                                            *mapx-intro*
 
-Mapx.nvim provides Lua helper functions that mimic Vim's |:map| family of
-commands. It aims to make configuring key bindings from within Lua more
-ergonomic.
+Mapx.nvim provides Lua helper functions that mimic Vim's |:map| and |:command|
+family of commands. It aims to make configuring key bindings and commands from
+within Lua more ergonomic.
 
 ==============================================================================
 2. Setup                                                            *mapx-setup*
@@ -319,6 +320,70 @@ called with a single argument, the value of vim's |v:count| special variable.
 
 In a |:map-<expr>|, the function's return value will become the ultimate `{rhs}`.
 
+------------------------------------------------------------------------------
+3.7 Commands                                                     *mapx-commands*
+
+Mapx provides a way to create commands with the cmd function.
+
+  mapx.cmd(name, fun, ...)                                          *mapx.cmd()*
+
+The first argument is the name of the command.
+
+The second arguemnt is a Vim command string or Lua function or
+table of functions.
+
+If using Lua, the function(s) will be passed a single argument as table
+of all the options the user passed to the command such as arguments,
+modifiers and the bang character.
+Each of the options can be nil depending on if the user passed the option or
+if the command supports the option.
+The options "arguments" and "modifiers" are never nil and are empty tables
+if the user passes none.
+Note that the range and count options are mutually exclusive because the
+commands in Vim can't accept both at the same time.
+
+The possible keys and values of options are:
+
+ - arguments: table - arguments passed through the command line which are
+                      evaluated once using the Lua load function
+
+ - modifiers: table - modifiers passed through the command line such as
+                      "vertical" and "rightbelow"
+
+ - register: string - if the command was not created with the "register"
+                      attribute then this is always nil, otherwise it is the
+                      name of the register the user passed to the command and
+                      an empty string if the user did not pass a register to
+                      the command
+
+ - range: table     - if the command was not created with the "range" attribute
+                      then this is always nil, otherwise if the user selected a
+                      range of lines the keys "first" and "last" will contain
+                      the numbers of first and last line of the range, else if
+                      the user passed a line number on the command line the key
+                      "line" will be set to the number of the line, else the
+                      range will be an empty object
+
+ - count: number    - if the command was not created with the "count" attribute
+                      or if the user did not pass a count on the command line
+                      than this is nil, otherwise this is  the number the user
+                      passed to the command on the commandline
+
+ - bang: boolean    - if the command was not created with the "bang" attribute
+                      then this is always nil, otherwise if the user passed the
+                      bang on the command line then this will be true, and if
+                      the user executed this command without the bang, this will
+                      be false
+
+The third argument is a table of Vim command attributes such as "nargs" and
+"complete".
+Attributes such as "bang" just have to be set to true, while attributes such
+as "nargs" and "complete" take string arguments.
+Note that the "range" and "count" attributes are mutually exclusive because the
+commands in Vim can't accept both at the same time.
+
+See the result of `:help :command` for more information.
+
 ==============================================================================
 4. Examples                                                      *mapx-examples*
 
@@ -365,6 +430,20 @@ With |mapx-config-whichkey| support enabled:
   m.vnoremap([[<leader>y]], [["+y]], "Yank to system clipboard")
   m.nnoremap([[<leader>Y]], [["+yg_]], "Yank until EOL to system clipboard")
   m.nnoremap([[<leader>yy]], [["+yy]], "Yank line to system clipboard")
+<
+
+Commands:
+>
+  local m = require'mapx'.setup{}
+  m.cmd("LspDiag",
+    function() vim.lsp.diagnostic.set_loclist() end,
+    {nargs = 0})
+  m.cmd("LspAddFolder",
+    function(opt) vim.lsp.buf.add_workspace_folder(opt.arguments[1]) end,
+    {nargs = 1, complete = 'file'})
+  m.cmd("LspRemFolder",
+    function(opt) vim.lsp.buf.remove_workspace_folder(opt.arguments[1]) end,
+    {nargs = 1, complete = 'file'})
 <
 ==============================================================================
 5. Auto-Conversion                                                *mapx-convert*

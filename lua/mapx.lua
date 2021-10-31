@@ -7,16 +7,17 @@ local cmd = require 'mapx.cmd'
 local dbgi = log.dbgi
 
 local function globalize(mapx, opt)
-  local mapFuncs = {}
+  local funcs = {}
   for _, mode in ipairs { '', 'n', 'v', 'x', 's', 'o', 'i', 'l', 'c', 't' } do
     local m = mode .. 'map'
     local n = mode .. 'noremap'
-    mapFuncs[m] = mapx[m]
-    mapFuncs[n] = mapx[n]
+    funcs[m] = mapx[m]
+    funcs[n] = mapx[n]
   end
-  mapFuncs.mapbang = mapx.mapbang
-  mapFuncs.noremapbang = mapx.noremapbang
-  for k, v in pairs(mapFuncs) do
+  funcs.mapbang = mapx.mapbang
+  funcs.noremapbang = mapx.noremapbang
+  funcs.cmd = mapx.cmd
+  for k, v in pairs(funcs) do
     if _G[k] ~= nil then
       if opt ~= 'force' then
         if opt == 'skip' then
@@ -375,41 +376,43 @@ end
 --
 -- The possible keys and values of options are:
 --
---  - arguments: table - arguments passed through the command line which are
---                       evaluated once using the Lua load function
+-- - arguments: table - arguments passed through the command line which are
+--                      evaluated once using the Lua load function
 --
---  - modifiers: table - modifiers passed through the command line such as
---                       "vertical" and "rightbelow"
+-- - modifiers: table - modifiers passed through the command line such as
+--                      "vertical" and "rightbelow"
 --
---  - register: string - if the command was not created with the "register"
---                       attribute then this is always nil, otherwise it is the
---                       name of the register the user passed to the command and
---                       an empty string if the user did not pass a register to
---                       the command
+-- - register: string - if the command was not created with the "register"
+--                      attribute then this is always nil, otherwise it is the
+--                      name of the register the user passed to the command and
+--                      an empty string if the user did not pass a register to
+--                      the command
 --
---  - range: table - if the command was not created with the "range" attribute
---                   then this is always nil, otherwise if the user selected a
---                   range of lines the keys "first" and "last" will contain the
---                   numbers of first and last line of the range, else if the
---                   user passed a line number on the command line the key
---                   "line" will be set to the number of the line, else the
---                   range will be an empty object
+-- - range: table     - if the command was not created with the "range" attribute
+--                      then this is always nil, otherwise if the user selected a
+--                      range of lines the keys "first" and "last" will contain
+--                      the numbers of first and last line of the range, else if
+--                      the user passed a line number on the command line the key
+--                      "line" will be set to the number of the line, else the
+--                      range will be an empty object
 --
---  - count: number - if the command was not created with the "count" attribute
---                    or if the user did not pass a count on the command line
---                    than this is nil, otherwise this is  the number the user
---                    passed to the command on the commandline
+-- - count: number    - if the command was not created with the "count" attribute
+--                      or if the user did not pass a count on the command line
+--                      than this is nil, otherwise this is  the number the user
+--                      passed to the command on the commandline
 --
---  - bang: boolean - if the command was not created with the "bang" attribute
---                    then this is always nil, otherwise if the user passed the
---                    bang on the command line then this will be true, and if
---                    the user executed this command without the bang, this will
---                    be false
+-- - bang: boolean    - if the command was not created with the "bang" attribute
+--                      then this is always nil, otherwise if the user passed the
+--                      bang on the command line then this will be true, and if
+--                      the user executed this command without the bang, this will
+--                      be false
 --
 -- @vararg attr table
 -- A table of Vim command attributes such as "nargs" and "complete".
 -- Attributes such as "bang" just have to be set to true, while attributes such
 -- as "nargs" and "complete" take string arguments.
+-- Note that the "range" and "count" attributes are mutually exclusive because the
+-- commands in Vim can't accept both at the same time.
 --
 -- @see See the result of ":help :command" for more information.
 function mapx.cmd(name, fun, ...)

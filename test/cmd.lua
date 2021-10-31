@@ -1,5 +1,7 @@
 it('creates commands', function()
   local mapx = require 'mapx'
+  mapx.setup { global = true }
+  expect.notNil(cmd)
   local cmd = mapx.cmd
 
   local var = nil
