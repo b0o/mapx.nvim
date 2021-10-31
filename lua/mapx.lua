@@ -362,16 +362,19 @@ end
 --
 -- @param  fun string|function|table
 -- Vim command string or Lua function or table of functions.
+--
 -- If using Lua, the function(s) will be passed a single argument as table
 -- of all the options the user passed to the command such as arguments,
 -- modifiers and the bang character.
 -- Each of the options can be nil depending on if the user passed the option or
 -- if the command supports the option.
--- The options arguments and modifiers are never nil and are empty tables if the
--- user passes none.
+-- The options "arguments" and "modifiers" are never nil and are empty tables
+-- if the user passes none.
 -- Note that the range and count options are mutually exclusive because the
 -- commands in Vim can't accept both at the same time.
+--
 -- The possible keys and values of options are:
+--
 --  - arguments: table - arguments passed through the command line which are
 --                       evaluated once using the Lua load function
 --
@@ -404,11 +407,22 @@ end
 --                    be false
 --
 -- @vararg attr table
--- Vim command attributes such as "nargs" and "complete".
+-- A table of Vim command attributes such as "nargs" and "complete".
+-- Attributes such as "bang" just have to be set to true, while attributes such
+-- as "nargs" and "complete" take string arguments.
 --
 -- @see See the result of ":help :command" for more information.
 function mapx.cmd(name, fun, ...)
-  cmd(name, fun, merge(...))
+  local new_fun = fun
+  if type(fun) == 'table' then
+    new_fun = function(...)
+      for _, f in ipairs(fun) do
+        f(unpack(...))
+      end
+    end
+  end
+
+  cmd(name, new_fun, merge(...))
 end
 
 return mapx

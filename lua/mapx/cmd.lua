@@ -7,17 +7,8 @@ local function create(self, name, fun, args)
   local cmd_str = ''
   cmd_str = cmd_str .. self.__generate_header(name, args) .. ' '
 
-  local new_fun = fun
-  if type(fun) == 'table' then
-    new_fun = function(...)
-      for _, f in ipairs(fun) do
-        f(unpack(...))
-      end
-    end
-  end
-
-  if type(new_fun) == 'function' then
-    self.__storage[self.key(name)] = new_fun
+  if type(fun) == 'function' then
+    self.__storage[self.key(name)] = fun
     cmd_str = cmd_str .. self.__generate_brigde(name, args) .. ' '
     for mem_name, __template in pairs(self) do
       if string.match(mem_name, 'template$') then
@@ -25,8 +16,8 @@ local function create(self, name, fun, args)
       end
     end
     cmd_str = cmd_str .. self.__generate_call(name, args) .. ' '
-  elseif type(new_fun) == 'string' then
-    cmd_str = cmd_str .. new_fun .. ' '
+  elseif type(fun) == 'string' then
+    cmd_str = cmd_str .. fun .. ' '
   else
     error('Wrong command function type for command: ' .. name)
     return
