@@ -150,7 +150,7 @@ mapx.nmap("K", "5k")
 
 Create commands easily with the `cmd` and `cmdbang` functions. The
 `cmdbang` function only differs from the `cmd` function in that it creates
-a function with a bang which overwrites a previously defned function with
+a function with a bang which overwrites a previously defined function with
 the same name.
 
 ```lua
