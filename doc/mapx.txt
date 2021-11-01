@@ -440,10 +440,10 @@ Commands:
   m.cmd("LspDiag",
     function() vim.lsp.diagnostic.set_loclist() end,
     {nargs = 0})
-  m.cmd("LspAddFolder",
+  m.cmdbang("LspAddFolder",
     function(opt) vim.lsp.buf.add_workspace_folder(opt.arguments[1]) end,
     {nargs = 1, complete = 'file'})
-  m.cmd("LspRemFolder",
+  m.cmdbang("LspRemFolder",
     function(opt) vim.lsp.buf.remove_workspace_folder(opt.arguments[1]) end,
     {nargs = 1, complete = 'file'})
 <

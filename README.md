@@ -21,7 +21,7 @@ vim.api.nvim_set_keymap("i", "<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]]
 
 vim.api.nvim_set_keymap("", "<M-/>", ":Commentary<Cr>", { silent = true })
 
-vim.cmd [[command! -nargs=0 LspDiag lua vim.lsp.diagnostic.set_loclist()]]
+vim.cmd [[command -nargs=0 LspDiag lua vim.lsp.diagnostic.set_loclist()]]
 ```
 
 With Mapx:
@@ -148,16 +148,19 @@ mapx.nmap("K", "5k")
 
 #### Commands
 
-Create commands easily.
+Create commands easily with the `cmd` and `cmdbang` functions. The
+`cmdbang` function only differs from the `cmd` function in that it creates
+a function with a bang which overwrites a previously defned function with
+the same name.
 
 ```lua
 cmd("LspDiag",
   function() vim.lsp.diagnostic.set_loclist() end,
   {nargs = 0})
-cmd("LspAddFolder",
+cmdbang("LspAddFolder",
   function(opt) vim.lsp.buf.add_workspace_folder(opt.arguments[1]) end,
   {nargs = 1, complete = 'file'})
-cmd("LspRemFolder",
+cmdbang("LspRemFolder",
   function(opt) vim.lsp.buf.remove_workspace_folder(opt.arguments[1]) end,
   {nargs = 1, complete = 'file'})
 ```
