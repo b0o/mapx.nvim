@@ -24,4 +24,18 @@ function M.merge(...)
   return res
 end
 
+-- Wrap all functions into one that calls them all. It passes all the arguments
+-- that were passed to the resulting function to the passed functions.
+--
+-- @vararg funcs function
+-- Functions to call in the resulting function.
+function M.wrap(...)
+  local funcs = { ... }
+  return function(...)
+    for _, fun in ipairs(funcs) do
+      fun(...)
+    end
+  end
+end
+
 return M

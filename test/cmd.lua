@@ -3,6 +3,7 @@ it('creates commands', function()
   mapx.setup { global = true }
   expect.notNil(cmd)
   local cmd = mapx.cmd
+  local cmdbang = mapx.cmdbang
 
   local var = nil
 
@@ -46,7 +47,7 @@ it('creates commands', function()
   expect.equal('x', var)
 
   -- function table test
-  cmd('SetVar', {
+  cmdbang('SetVar', {
     function(opt)
       if opt.register ~= '' then
         var = opt.register
@@ -72,7 +73,7 @@ it('creates commands', function()
   -- function Vim command string test
   vim.g.var = nil
 
-  cmd('SetVar', 'let g:var = <q-reg>', {
+  cmdbang('SetVar', 'let g:var = <q-reg>', {
     nargs = 0,
     register = true,
   })

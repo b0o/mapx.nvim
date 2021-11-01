@@ -2,10 +2,10 @@ local cmd = {}
 
 -- public
 
-local function create(self, name, fun, args)
+local function create(self, name, bang, fun, args)
   args = args or {}
   local cmd_str = ''
-  cmd_str = cmd_str .. self.__generate_header(name, args) .. ' '
+  cmd_str = cmd_str .. self.__generate_header(name, bang, args) .. ' '
 
   if type(fun) == 'function' then
     self.__storage[self.__key(name)] = fun
@@ -90,7 +90,7 @@ function cmd.__normalize(cmd_str)
   return cmd_str
 end
 
-function cmd.__generate_header(name, args)
+function cmd.__generate_header(name, bang, args)
   local header = ''
 
   if type(args) == 'table' then
@@ -109,7 +109,7 @@ function cmd.__generate_header(name, args)
     error('Wrong type of args for command: ' .. name)
   end
 
-  return string.format([[ command! %s %s ]], header, name)
+  return string.format([[ command%s %s %s ]], bang, header, name)
 end
 
 function cmd.__generate_brigde(_, _)
