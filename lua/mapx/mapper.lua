@@ -39,20 +39,16 @@ local function expandStringOpts(opts)
   return res
 end
 
-local function extractLabel(opts)
-  local _opts = merge({}, opts)
-  local label
-  if _opts.label ~= nil then
-    label = _opts.label
-    _opts.label = nil
-    return label, _opts
-  end
+function Mapper:normalizeOpts(opts)
+  local _opts = vim.deepcopy(opts)
   if _opts[#_opts] ~= nil and Mapper.mapopts[_opts[#_opts]] == nil then
-    label = _opts[#_opts]
+    -- Extract the WhichKey label from the last numeric table element and put
+    -- it into the `label` field.
+    local label = _opts[#_opts]
     table.remove(_opts, #_opts)
-    return label, _opts
+    _opts.label = label
   end
-  return nil, _opts
+  return _opts
 end
 
 function Mapper.new()
@@ -61,12 +57,13 @@ function Mapper.new()
     luaFuncs = {},
     filetypeMaps = {},
     groupOpts = {},
+    groupActive = false,
     whichkey = nil,
   }
   vim.cmd [[
     augroup mapx_mapper
-      autocmd!
-      autocmd FileType * lua require'mapx'.mapper:filetype(vim.fn.expand('<amatch>'), vim.fn.expand('<abuf>'))
+      au!
+      au FileType * lua require'mapx'.mapper:filetype()
     augroup END
   ]]
   return setmetatable(self, { __index = Mapper })
@@ -75,11 +72,14 @@ end
 function Mapper:setup(config)
   self.config = merge(self.config, config)
   if self.config.whichkey then
-    local ok, wk = pcall(require, 'which-key')
+    local ok
+    ok, self.whichkey = pcall(
+      require('mapx.whichkey').new,
+      type(self.config.whichkey) == 'table' and self.config.whichkey
+    )
     if not ok then
-      error 'mapx.Map:setup: config.whichkey == true but module "which-key" not found'
+      error('mapx.Map:setup: Unable to set up WhichKey integration: ' .. self.whichkey)
     end
-    self.whichkey = wk
   end
   dbgi('mapx.Map:setup', self)
   return self
@@ -99,14 +99,16 @@ function Mapper:filetypeMap(fts, fn)
   dbgi('mapx.Map.filetypeMaps insert', self.filetypeMaps)
 end
 
-function Mapper:filetype(ft, buf, ...)
+function Mapper:filetype()
+  local ft = vim.fn.expand '<amatch>'
+  local buf = tonumber(vim.fn.expand '<abuf>')
   local filetypeMaps = self.filetypeMaps[ft]
-  dbgi('mapx.Map:handleFiletype', { ft = ft, ftMaps = filetypeMaps, rest = { ... } })
+  dbgi('mapx.Map:handleFiletype', { ft = ft, buf = buf, ftMaps = filetypeMaps })
   if filetypeMaps == nil then
     return
   end
   for _, fn in ipairs(filetypeMaps) do
-    fn(buf, ...)
+    fn(buf)
   end
 end
 
@@ -118,16 +120,15 @@ function Mapper:func(id, ...)
   return fn(...)
 end
 
-function Mapper:registerMap(mode, lhs, rhs, opts, wkopts, label)
-  if label then
+function Mapper:registerMap(mode, lhs, rhs, opts)
+  if opts.label then
     if self.whichkey then
-      local regval = { [lhs] = { rhs, label } }
-      local regopts = merge({
-        mode = mode ~= '' and mode or nil,
-      }, wkopts)
-      regopts.silent = regopts.silent ~= nil and regopts.silent or false
-      dbgi('Mapper:registerMap (whichkey)', { mode = mode, regval = regval, regopts = regopts })
-      self.whichkey.register(regval, regopts)
+      local label = opts.label
+      opts.label = nil
+      local buffer = opts.buffer
+      opts.buffer = nil
+      self.whichkey:map(mode, buffer, lhs, merge({ rhs, label }, opts))
+      return
     end
   elseif opts.buffer then
     local bopts = merge({}, opts)
@@ -145,17 +146,11 @@ function Mapper:registerName(mode, lhs, opts)
     error 'mapx.name: missing name'
   end
   if self.whichkey then
-    local reg = {
-      [lhs] = {
-        name = opts.name,
-      },
-    }
-    local regopts = merge {
-      buffer = opts.buffer or nil,
-      mode = mode ~= '' and mode or nil,
-    }
-    dbgi('Mapper:registerName', { mode = mode, reg = reg, regopts = regopts })
-    self.whichkey.register(reg, regopts)
+    dbgi('Mapper:registerName', { mode = mode, lhs = lhs, opts = opts })
+    local buffer = opts.buffer
+    opts.buffer = nil
+    self.whichkey:map(mode, buffer, lhs, { name = opts.name })
+    return
   end
 end
 
@@ -175,14 +170,11 @@ function Mapper:register(config, lhss, rhs, ...)
     return
   end
   opts = expandStringOpts(opts)
-  local label
-  local wkopts
   if opts.buffer == true then
     opts.buffer = 0
   end
-  if self.whichkey ~= nil then
-    label, wkopts = extractLabel(opts)
-  end
+  opts = self:normalizeOpts(opts)
+
   if type(lhss) ~= 'table' then
     lhss = { lhss }
   end
@@ -200,7 +192,7 @@ function Mapper:register(config, lhss, rhs, ...)
   end
   for _, lhs in ipairs(lhss) do
     if config.type == 'map' then
-      self:registerMap(config.mode, lhs, rhs, opts, wkopts, label)
+      self:registerMap(config.mode, lhs, rhs, opts)
     elseif config.type == 'name' then
       self:registerName(config.mode, lhs, opts)
     end
@@ -220,12 +212,18 @@ function Mapper:group(...)
   end
   self.groupOpts = expandStringOpts(self.groupOpts)
   dbgi('group', self.groupOpts)
-  local label = extractLabel(self.groupOpts)
-  if label ~= nil then
-    error('mapx.group: cannot set label on group: ' .. tostring(label))
+  local opts = self:normalizeOpts(self.groupOpts)
+  if opts.label ~= nil then
+    error('mapx.group: cannot set label on group: ' .. tostring(opts.label))
   end
+  local prevGroupActive = self.groupActive
+  self.groupActive = true
   fn()
+  self.groupActive = prevGroupActive
   self.groupOpts = prevOpts
+  if self.groupActive == false and self.whichkey then
+    self.whichkey:flush()
+  end
 end
 
 return Mapper
