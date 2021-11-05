@@ -169,7 +169,7 @@ function Mapper:register(config, lhss, rhs, ...)
     opts.ft = nil
     opts.filetype = nil
     self:filetypeMap(ft, function(buf)
-      opts.buffer = opts.buffer or buf
+      opts.buffer = buf
       self:register(config, lhss, rhs, opts)
     end)
     return
