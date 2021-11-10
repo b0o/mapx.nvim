@@ -18,6 +18,7 @@ local function globalize(mapx, opt)
   funcs.mapbang = mapx.mapbang
   funcs.noremapbang = mapx.noremapbang
   funcs.cmd = mapx.cmd
+  funcs.cmdbang = mapx.cmdbang
   for k, v in pairs(funcs) do
     if _G[k] ~= nil then
       if opt ~= 'force' then
