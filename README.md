@@ -1,9 +1,11 @@
 # Mapx.nvim [![version](https://img.shields.io/github/v/tag/b0o/mapx.nvim?style=flat&color=yellow&label=version&sort=semver)](https://github.com/b0o/mapx.nvim/releases) [![license: MIT](https://img.shields.io/github/license/b0o/mapx.nvim?style=flat&color=green)](https://mit-license.org) [![Build Status](https://img.shields.io/github/workflow/status/b0o/mapx.nvim/test)](https://github.com/b0o/mapx.nvim/actions/workflows/test.yaml)
 
-A Neovim Lua plugin to make mapping more manageable.
+A Neovim Lua plugin to make mapping and commands more manageable.
 
-Mapx.nvim is a Lua library that mimics Vim's `:map` family of commands.
-Its aim is to make configuring key mappings from within Lua more ergonomic.
+Mapx.nvim is a Lua library that mimics Vim's `:map` and `:command` family of
+commands.
+Its aim is to make configuring key mappings and commands from within Lua more
+ergonomic.
 
 Without Mapx:
 
@@ -18,6 +20,8 @@ vim.api.nvim_set_keymap("i", "<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], { 
 vim.api.nvim_set_keymap("i", "<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], { noremap = true, silent = true, expr = true })
 
 vim.api.nvim_set_keymap("", "<M-/>", ":Commentary<Cr>", { silent = true })
+
+vim.cmd [[command -nargs=0 LspDiag lua vim.lsp.diagnostic.set_loclist()]]
 ```
 
 With Mapx:
@@ -35,6 +39,8 @@ inoremap("<Tab>", [[pumvisible() ? "\<C-n>" : "\<Tab>"]], "silent", "expr")
 inoremap("<S-Tab>", [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], "silent", "expr")
 
 map("<M-/>", ":Commentary<Cr>", "silent")
+
+cmd("LspDiag", function() vim.lsp.diagnostic.set_loclist() end, {nargs = 0})
 ```
 
 ## Features
@@ -140,6 +146,25 @@ mapx.nmap("J", "5j")
 mapx.nmap("K", "5k")
 ```
 
+#### Commands
+
+Create commands easily with the `cmd` and `cmdbang` functions. The
+`cmdbang` function only differs from the `cmd` function in that it creates
+a function with a bang which overwrites a previously defined function with
+the same name.
+
+```lua
+cmd("LspDiag",
+  function() vim.lsp.diagnostic.set_loclist() end,
+  {nargs = 0})
+cmdbang("LspAddFolder",
+  function(opt) vim.lsp.buf.add_workspace_folder(opt.arguments[1]) end,
+  {nargs = 1, complete = 'file'})
+cmdbang("LspRemFolder",
+  function(opt) vim.lsp.buf.remove_workspace_folder(opt.arguments[1]) end,
+  {nargs = 1, complete = 'file'})
+```
+
 #### Documentation
 
 Mapx is fully documented. See [`:help mapx`](https://github.com/b0o/mapx.nvim/blob/main/doc/mapx.txt).
@@ -168,11 +193,13 @@ we'd like to include the following features in future versions:
 - [ ] Autocommand mappings (a generalization of FileType mappings).
 - [ ] VimL conversion tool.
 - [ ] [Telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) integration.
-- [ ] API for creating user commands and autocommands.
+- [x] API for creating user commands.
+- [ ] API for creating user autocommands.
 - [ ] Support passing mapping mode in opts.
 - [ ] Support specifying multiple modes as a string like 'nvt'.
 - [ ] Support specifying labels on groups which become which-key group names.
 - [ ] Support progressively building up maps with groups, like:
+
   ```lua
   mapx.group({ prefix = "<leader>t" }, "LSP", function()
     mapx.group({ prefix = "g" }, "Goto", function()
@@ -202,6 +229,7 @@ we'd like to include the following features in future versions:
   nnoremap ("<leader>lwr", "<cmd>lua vim.lsp.buf.remove_workspace_folder()<Cr>",                    "LSP-Workspace: Rm folder")
   nnoremap ("<leader>lwl", "<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<Cr>", "LSP-Workspace: List folders")
   ```
+
 - [ ] Better test coverage
 - [ ] Support setting default opts in `.setup{}`
 - [ ] Benchmarks
@@ -210,6 +238,9 @@ we'd like to include the following features in future versions:
 ## Changelog
 
 ```
+01 Nov 2021                                                             v0.2.2
+   Added user command support
+
 10 Sep 2021                                                             v0.2.1
    Renamed project to Mapx.nvim
    Added tests
