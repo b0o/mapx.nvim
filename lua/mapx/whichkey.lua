@@ -7,6 +7,7 @@ local function register(maps, opts)
   opts = opts or {}
   opts.mode = opts.mode ~= '' and opts.mode or nil
   opts.buffer = opts.buffer ~= -1 and opts.buffer or nil
+  opts.silent = opts.silent ~= nil and opts.silent or false
   dbgi('mapx.whichkey register', { maps = maps, opts = opts })
   wk.register(maps, opts)
 end
