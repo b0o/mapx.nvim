@@ -60,7 +60,6 @@ function mapx.setup(config)
     mapx.globalized = true
   end
   deprecated.checkConfig(mapx.config)
-  mapx.setup = true
   dbgi('setup', mapx)
   return mapx
 end
