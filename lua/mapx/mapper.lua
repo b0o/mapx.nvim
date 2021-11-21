@@ -192,9 +192,9 @@ function Mapper:register(config, lhss, rhs, ...)
   end
   for _, lhs in ipairs(lhss) do
     if config.type == 'map' then
-      self:registerMap(config.mode, lhs, rhs, opts)
+      self:registerMap(config.mode, lhs, rhs, vim.deepcopy(opts))
     elseif config.type == 'name' then
-      self:registerName(config.mode, lhs, opts)
+      self:registerName(config.mode, lhs, vim.deepcopy(opts))
     end
   end
 end
