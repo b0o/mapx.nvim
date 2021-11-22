@@ -77,7 +77,7 @@ end
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
 function mapx.map(lhs, rhs, ...)
-  return mapx.mapper:register('', lhs, rhs, ...)
+  return mapx.mapper:register('', lhs, rhs, { noremap = false }, ...)
 end
 
 -- Create a Normal mode mapping
@@ -86,7 +86,7 @@ end
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
 function mapx.nmap(lhs, rhs, ...)
-  return mapx.mapper:register('n', lhs, rhs, ...)
+  return mapx.mapper:register('n', lhs, rhs, { noremap = false }, ...)
 end
 
 -- Create a Normal and Command mode mapping
@@ -95,7 +95,7 @@ end
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
 function mapx.mapbang(lhs, rhs, ...)
-  return mapx.mapper:register('!', lhs, rhs, ...)
+  return mapx.mapper:register('!', lhs, rhs, { noremap = false }, ...)
 end
 
 -- Create a Visual and Select mode mapping
@@ -104,7 +104,7 @@ end
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
 function mapx.vmap(lhs, rhs, ...)
-  return mapx.mapper:register('v', lhs, rhs, ...)
+  return mapx.mapper:register('v', lhs, rhs, { noremap = false }, ...)
 end
 
 -- Create a Visual mode mapping
@@ -113,7 +113,7 @@ end
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
 function mapx.xmap(lhs, rhs, ...)
-  return mapx.mapper:register('x', lhs, rhs, ...)
+  return mapx.mapper:register('x', lhs, rhs, { noremap = false }, ...)
 end
 
 -- Create a Select mode mapping
@@ -122,7 +122,7 @@ end
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
 function mapx.smap(lhs, rhs, ...)
-  return mapx.mapper:register('s', lhs, rhs, ...)
+  return mapx.mapper:register('s', lhs, rhs, { noremap = false }, ...)
 end
 
 -- Create an Operator-pending mode mapping
@@ -131,7 +131,7 @@ end
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
 function mapx.omap(lhs, rhs, ...)
-  return mapx.mapper:register('o', lhs, rhs, ...)
+  return mapx.mapper:register('o', lhs, rhs, { noremap = false }, ...)
 end
 
 -- Create an Insert mode mapping
@@ -140,7 +140,7 @@ end
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
 function mapx.imap(lhs, rhs, ...)
-  return mapx.mapper:register('i', lhs, rhs, ...)
+  return mapx.mapper:register('i', lhs, rhs, { noremap = false }, ...)
 end
 
 -- Create an Insert, Command, and Lang-arg mode mapping
@@ -149,7 +149,7 @@ end
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
 function mapx.lmap(lhs, rhs, ...)
-  return mapx.mapper:register('l', lhs, rhs, ...)
+  return mapx.mapper:register('l', lhs, rhs, { noremap = false }, ...)
 end
 
 -- Create a Command mode mapping
@@ -158,7 +158,7 @@ end
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
 function mapx.cmap(lhs, rhs, ...)
-  return mapx.mapper:register('c', lhs, rhs, ...)
+  return mapx.mapper:register('c', lhs, rhs, { noremap = false }, ...)
 end
 
 -- Create a Terminal mode mapping
@@ -167,7 +167,7 @@ end
 -- @vararg opts  string|table Map options
 -- @param  label string       Optional label for which-key.nvim
 function mapx.tmap(lhs, rhs, ...)
-  return mapx.mapper:register('t', lhs, rhs, ...)
+  return mapx.mapper:register('t', lhs, rhs, { noremap = false }, ...)
 end
 
 -- Create a non-recursive Normal, Visual, Select, and Operator-pending mode mapping
