@@ -122,15 +122,16 @@ end
 
 function Mapper:registerMap(mode, lhs, rhs, opts)
   if opts.label then
+    local label = opts.label
+    opts.label = nil
     if self.whichkey then
-      local label = opts.label
-      opts.label = nil
       local buffer = opts.buffer
       opts.buffer = nil
       self.whichkey:map(mode, buffer, lhs, merge({ rhs, label }, opts))
       return
     end
-  elseif opts.buffer then
+  end
+  if opts.buffer then
     local bopts = merge({}, opts)
     bopts.buffer = nil
     dbgi('Mapper:registerMap (buffer)', { mode = mode, lhs = lhs, rhs = rhs, opts = opts, bopts = bopts })
