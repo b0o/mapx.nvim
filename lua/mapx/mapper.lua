@@ -191,10 +191,9 @@ function Mapper:register(config, lhss, rhs, ...)
     end
     lhss = new_lhss
     opts.prefix = nil
-
-    if self.groupActive then
-      self.groupMapsType[config.mode] = true
-    end
+  end
+  if self.groupActive then
+    self.groupMapsType[config.mode] = true
   end
 
   if type(rhs) == 'function' then
