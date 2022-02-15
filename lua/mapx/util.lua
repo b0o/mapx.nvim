@@ -5,6 +5,24 @@ local M = {}
 -- - Right-most arguments take precedence.
 -- - Numeric indices are extended, not replaced.
 -- - No side effects.
+function M.setMerge(...)
+  local res = {}
+  for i = 1, select('#', ...) do
+    local arg = select(i, ...)
+    for k, v in pairs(arg) do
+      if v then
+        res[k] = true
+      end
+    end
+  end
+  return res
+end
+
+-- Flat merge of 2 or more tables, supporting a mixture of map-like tables and
+-- list-list tables.
+-- - Right-most arguments take precedence.
+-- - Numeric indices are extended, not replaced.
+-- - No side effects.
 function M.merge(...)
   local res = {}
   for i = 1, select('#', ...) do
@@ -13,6 +31,8 @@ function M.merge(...)
       for k, v in pairs(arg) do
         if type(k) == 'number' then
           table.insert(res, v)
+        elseif k == 'prefix' then
+          res[k] = res[k] ~= nil and res[k] .. v or v
         else
           res[k] = v
         end
