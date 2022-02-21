@@ -9,6 +9,9 @@ local function register(maps, opts)
   opts.buffer = opts.buffer ~= -1 and opts.buffer or nil
   opts.silent = opts.silent ~= nil and opts.silent or false
   opts.noremap = opts.noremap ~= nil and opts.noremap or false
+  if opts.buffer and not vim.api.nvim_buf_is_valid(opts.buffer) then
+    return
+  end
   dbgi('mapx.whichkey register', { maps = maps, opts = opts })
   wk.register(maps, opts)
 end

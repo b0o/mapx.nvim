@@ -121,6 +121,9 @@ function Mapper:func(id, ...)
 end
 
 function Mapper:registerMap(mode, lhs, rhs, opts)
+  if opts.buffer and not vim.api.nvim_buf_is_valid(opts.buffer) then
+    return
+  end
   if opts.label then
     local label = opts.label
     opts.label = nil
