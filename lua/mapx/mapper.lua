@@ -1,4 +1,6 @@
-local merge = require('mapx.util').merge
+local util = require 'mapx.util'
+local merge = util.merge
+local setMerge = util.setMerge
 local log = require 'mapx.log'
 
 local dbgi = log.dbgi
@@ -11,6 +13,7 @@ local Mapper = {
     script = { script = true },
     expr = { expr = true },
     unique = { unique = true },
+    prefix = { prefix = '<leader>' },
   },
 }
 
@@ -22,12 +25,12 @@ local function expandStringOpts(opts)
   for k, v in pairs(opts) do
     if type(k) == 'number' then
       if Mapper.mapopts[v] then
-        res[v] = true
+        res = merge(res, Mapper.mapopts[v])
         goto continue
       end
       local vsub = type(v) == 'string' and vim.fn.substitute(v, [[^<\|>$]], '', 'g')
       if vsub and Mapper.mapopts[vsub] ~= nil then
-        res[vsub] = true
+        res = merge(res, Mapper.mapopts[vsub])
         goto continue
       end
       table.insert(res, v)
@@ -57,6 +60,7 @@ function Mapper.new()
     luaFuncs = {},
     filetypeMaps = {},
     groupOpts = {},
+    groupMapsType = {},
     groupActive = false,
     whichkey = nil,
   }
@@ -182,6 +186,19 @@ function Mapper:register(config, lhss, rhs, ...)
   if type(lhss) ~= 'table' then
     lhss = { lhss }
   end
+
+  if opts.prefix ~= nil then
+    local new_lhss = {}
+    for _, lhs in ipairs(lhss) do
+      table.insert(new_lhss, opts.prefix .. lhs)
+    end
+    lhss = new_lhss
+    opts.prefix = nil
+  end
+  if self.groupActive then
+    self.groupMapsType[config.mode] = true
+  end
+
   if type(rhs) == 'function' then
     -- TODO: rhs gets inserted multiple times if a filetype mapping is
     -- triggered multiple times
@@ -215,18 +232,38 @@ function Mapper:group(...)
     end
   end
   self.groupOpts = expandStringOpts(self.groupOpts)
+  self.groupOpts = self:normalizeOpts(self.groupOpts)
   dbgi('group', self.groupOpts)
-  local opts = self:normalizeOpts(self.groupOpts)
-  if opts.label ~= nil then
-    error('mapx.group: cannot set label on group: ' .. tostring(opts.label))
+  local opts = self.groupOpts
+  if opts.label ~= nil and opts.prefix == nil then
+    error('mapx.group: cannot set label on group without prefix: ' .. tostring(opts.label))
   end
+  local label = opts.label
+  opts.label = nil
   local prevGroupActive = self.groupActive
+  local prevGroupMapsType = self.groupMapsType
   self.groupActive = true
+  self.groupMapsType = {}
   fn()
+  if opts.prefix ~= nil and label ~= nil then
+    local new_opts = vim.deepcopy(opts)
+    new_opts.name = label
+    new_opts.prefix = nil
+    for k, v in pairs(self.groupMapsType) do
+      if v then
+        self:registerName(k, opts.prefix, new_opts)
+      end
+    end
+  end
   self.groupActive = prevGroupActive
   self.groupOpts = prevOpts
-  if self.groupActive == false and self.whichkey then
-    self.whichkey:flush()
+  self.groupMapsType = setMerge(self.groupMapsType, prevGroupMapsType)
+  self.groupActive = true
+  if self.groupActive == false then
+    if self.whichkey then
+      self.whichkey:flush()
+    end
+    self.groupMapsType = {}
   end
 end
 
