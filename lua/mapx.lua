@@ -80,6 +80,18 @@ function mapx.map(lhs, rhs, ...)
   return mapx.mapper:register('', lhs, rhs, { noremap = false }, ...)
 end
 
+-- Create a mapping for multiple modes
+-- @param modes  string[]     Modes
+-- @param  lhs   string|table Left-hand side(s) of map
+-- @param  rhs   string       Right-hand side of map
+-- @vararg opts  string|table Map options
+-- @param  label string       Optional label for which-key.nvim
+function mapx.mapmode(modes, lhs, rhs, ...)
+  for _, mode in ipairs(vim.tbl_flatten({ modes })) do
+    mapx.mapper:register(mode, lhs, rhs, { noremap = false }, ...)
+  end
+end
+
 -- Create a Normal mode mapping
 -- @param  lhs   string|table Left-hand side(s) of map
 -- @param  rhs   string       Right-hand side of map
